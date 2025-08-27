@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0", "pybind11>=2.10", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vitvqganvae"
+version = "0.0.1"
+authors = [
+  { name="KhoiDOO", email="khoido8899@gmail.com" }, # Replace with your actual name and email
+]
+description = "VITVQGANVAE"
+readme = "README.md" # Create a README.md file later
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+  "beartype==0.21.0"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/KhoiDOO/vitvqganvae" # Replace with your project URL
+"Bug Tracker" = "https://github.com/KhoiDOO/vitvqganvae/issues" # Replace with your bug tracker URL
