@@ -13,7 +13,7 @@ class DecoderBlock(nn.Module):
             group: int, 
             conv_type: str = "conv2d",
             act_func: str = "GLU",
-            act_kwargs: dict = None
+            act_kwargs: dict = {"dim": 1}
         ) -> None:
         super().__init__()
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vitvqganvae"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="KhoiDOO", email="khoido8899@gmail.com" }, # Replace with your actual name and email
 ]
@@ -17,7 +17,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "beartype==0.21.0"
+  "beartype==0.21.0",
+  "einops==0.8.1",
+  "vector-quantize-pytorch==1.23.1",
+  "accelerate==1.10.0"
 ]
 
 [project.urls]

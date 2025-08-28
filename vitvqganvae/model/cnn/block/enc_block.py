@@ -13,7 +13,7 @@ class EncoderBlock(nn.Module):
             group: int, 
             conv_type: str = "conv2d",
             act_func: str = "LeakyReLU",
-            act_kwargs: dict = None
+            act_kwargs: dict = {"negative_slope": 0.1}
         ) -> None:
         super().__init__()
 

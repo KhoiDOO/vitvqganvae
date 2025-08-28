@@ -29,6 +29,61 @@ class TestEncoder(unittest.TestCase):
 			first_conv_kernel_size=self.first_conv_kernel_size
 		)
 
+	def test_different_conv_types(self):
+		# conv1d
+		encoder_1d = Encoder(
+			dim=self.dim,
+			in_channel=self.in_channel,
+			layers=self.layers,
+			layer_mults=self.layer_mults,
+			num_res_blocks=self.num_res_blocks,
+			group=self.group,
+			conv_type="conv1d",
+			act_func=self.act_func,
+			act_kwargs=self.act_kwargs,
+			first_conv_kernel_size=self.first_conv_kernel_size
+		)
+		x1d = torch.randn(2, self.in_channel, self.image_size)
+		out1d = encoder_1d(x1d)
+		self.assertEqual(out1d.shape[0], 2)
+		self.assertEqual(out1d.shape[1], encoder_1d.encoded_dim)
+
+		# conv2d
+		encoder_2d = Encoder(
+			dim=self.dim,
+			in_channel=self.in_channel,
+			layers=self.layers,
+			layer_mults=self.layer_mults,
+			num_res_blocks=self.num_res_blocks,
+			group=self.group,
+			conv_type="conv2d",
+			act_func=self.act_func,
+			act_kwargs=self.act_kwargs,
+			first_conv_kernel_size=self.first_conv_kernel_size
+		)
+		x2d = torch.randn(2, self.in_channel, self.image_size, self.image_size)
+		out2d = encoder_2d(x2d)
+		self.assertEqual(out2d.shape[0], 2)
+		self.assertEqual(out2d.shape[1], encoder_2d.encoded_dim)
+
+		# conv3d
+		encoder_3d = Encoder(
+			dim=self.dim,
+			in_channel=self.in_channel,
+			layers=self.layers,
+			layer_mults=self.layer_mults,
+			num_res_blocks=self.num_res_blocks,
+			group=self.group,
+			conv_type="conv3d",
+			act_func=self.act_func,
+			act_kwargs=self.act_kwargs,
+			first_conv_kernel_size=2  # smaller kernel size to avoid input size error
+		)
+		x3d = torch.randn(2, self.in_channel, 8, self.image_size, self.image_size)  # increase depth to 8
+		out3d = encoder_3d(x3d)
+		self.assertEqual(out3d.shape[0], 2)
+		self.assertEqual(out3d.shape[1], encoder_3d.encoded_dim)
+
 	def test_properties(self):
 		self.assertEqual(self.encoder.dim, self.dim)
 		self.assertEqual(self.encoder.in_channel, self.in_channel)

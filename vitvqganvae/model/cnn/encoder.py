@@ -4,6 +4,7 @@ from ...utils.helpers import default
 
 from torch import nn, Tensor
 
+from typing import Union
 from beartype import beartype
 
 @beartype
@@ -13,12 +14,12 @@ class Encoder(nn.Module):
             dim: int,
             in_channel: int = 3,
             layers: int = 4,
-            layer_mults: list[int] = None,
-            num_res_blocks: int | tuple[int] = 1,
+            layer_mults: Union[list[int], None] = None,
+            num_res_blocks: Union[int, tuple[int, ...]] = 1,
             group: int = 16,
             conv_type: str = "conv2d",
-            act_func: str = "GLU",
-            act_kwargs: dict = None,
+            act_func: str = "LeakyReLU",
+            act_kwargs: dict = {"negative_slope": 0.1},
             first_conv_kernel_size: int = 5
         ):
         super().__init__()
@@ -57,6 +58,7 @@ class Encoder(nn.Module):
                         in_channels=dim_in,
                         out_channels=dim_out,
                         kernel_size=4,
+                        stride=2,
                         padding=1
                     ),
                     getattr(nn, act_func)(
@@ -76,10 +78,10 @@ class Encoder(nn.Module):
                     )
                 )
 
-        self.blocks.insert(0, nn.Conv2d(
-            self._in_channel, 
-            self._dim, 
-            kernel_size=self._first_conv_kernel_size, 
+        self.blocks.insert(0, cnn_mapping[conv_type](
+            self._in_channel,
+            self._dim,
+            kernel_size=self._first_conv_kernel_size,
             padding=self._first_conv_kernel_size // 2
             )
         )
