@@ -47,7 +47,7 @@ spec:
             cd vitvqganvae/
             wandb login ${WANDB_API_KEY}
             accelerate launch \
-              --mixed_precision=fp16 \
+              --mixed_precision=no \
               --num_processes=1 \
               --num_machines=1 \
               --dynamo_backend=no \
