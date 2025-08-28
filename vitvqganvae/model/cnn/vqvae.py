@@ -45,7 +45,7 @@ class VQVAE(nn.Module):
             "kmeans_init": True,
             "use_cosine_sim": True
         },
-        l2_recon_loss: bool = False
+        l2_recon_loss: bool = True
     ):
         super().__init__()
 
@@ -161,7 +161,7 @@ class VQVAE(nn.Module):
         img: torch.Tensor,
         return_loss: bool = False,
         return_recons: bool = False
-    ) -> Union[torch.Tensor, tuple[torch.Tensor, torch.Tensor]]:
+    ) -> dict[str, torch.Tensor] | torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         conv_type = getattr(self, '_conv_type', 'conv2d')
         device = img.device
         shape = img.shape
@@ -184,12 +184,10 @@ class VQVAE(nn.Module):
     
         recon_loss = self.recon_loss_fn(fmap, img)
 
-        loss = recon_loss + commit_loss
-
         if return_recons:
             return recon_loss, fmap
-        
-        return loss
+
+        return {"recon_loss": recon_loss, "quantizer_loss": commit_loss}
 
     @property
     def dim(self) -> int:

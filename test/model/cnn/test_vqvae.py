@@ -12,7 +12,7 @@ class TestVQVAE(unittest.TestCase):
         self.layers = 2
         self.layer_mults = None
         self.num_res_blocks = 1
-        self.group = 8
+        self.group = 16
         self.codebook_size = 16
         self.image_size = 32
         self.batch_size = 2
@@ -57,7 +57,9 @@ class TestVQVAE(unittest.TestCase):
         out = self.vqvae(self.img)
         self.assertEqual(out.shape, self.img.shape)
         loss = self.vqvae(self.img, return_loss=True)
-        self.assertIsInstance(loss, torch.Tensor)
+        self.assertIsInstance(loss, dict)
+        self.assertIn('recon_loss', loss)
+        self.assertIn('quantizer_loss', loss)
         recon_loss, recons = self.vqvae(self.img, return_loss=True, return_recons=True)
         self.assertIsInstance(recon_loss, torch.Tensor)
         self.assertEqual(recons.shape, self.img.shape)
@@ -96,6 +98,30 @@ class TestVQVAE(unittest.TestCase):
         self.assertIsInstance(self.vqvae.encoded_dim, int)
         self.assertIsInstance(self.vqvae.fmap_size(self.image_size), int)
         self.assertIsInstance(self.vqvae.copy_for_eval(), VQVAE)
+
+    def test_multiple_layers(self):
+        for layers, image_size in zip([2, 4, 6], [32, 64, 128]):
+            vqvae = VQVAE(
+                dim=self.dim,
+                in_channel=self.in_channel,
+                out_channel=self.out_channel,
+                layers=layers,
+                layer_mults=None,
+                num_res_blocks=self.num_res_blocks,
+                group=self.group,
+                codebook_size=self.codebook_size,
+                l2_recon_loss=True,
+                quantizer_kwargs={
+                    "codebook_dim": 64,
+                    "decay": 0.99,
+                    "commitment_weight": 0.25,
+                    "kmeans_init": True,
+                    "use_cosine_sim": True
+                },
+            ).to(self.device)
+            img = torch.randn(self.batch_size, self.in_channel, image_size, image_size, device=self.device)
+            out = vqvae(img)
+            self.assertEqual(out.shape, img.shape)
 
 if __name__ == "__main__":
     unittest.main()
