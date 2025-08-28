@@ -1,0 +1,70 @@
+name: cifar10_vqvae
+exp_root_dir: outputs
+exp_dir: ""
+trial_dir: ""
+n_gpus: 1
+seed: 42
+
+model: VQVAE
+model_config: VQVAEConfig
+model_kwargs:
+  dim: 128
+  in_channel: 3
+  out_channel: 3
+  layers: 2
+  layer_mults: null
+  num_res_blocks: 2
+  group: 16
+  conv_type: "conv2d"
+  enc_act_func: "LeakyReLU"
+  dec_act_func: "GLU"
+  enc_act_kwargs: {"negative_slope": 0.1}
+  dec_act_kwargs: {"dim": 1}
+  first_conv_kernel_size: 5
+  quantizer: "VectorQuantize"
+  codebook_size: 512
+  quantizer_kwargs: {
+      "codebook_dim": 64,
+      "decay" : 0.99,
+      "commitment_weight": 0.25,
+      "kmeans_init": True,
+      "use_cosine_sim": True
+  }
+  l2_recon_loss: True
+
+trainer: VQVAETrainer
+trainer_config: VQVAETrainerConfig
+trainer_kwargs:
+  num_train_steps: 15000
+  batch_size: 256
+  num_workers: 16
+  pin_memory: True
+  grad_accum_every: 1
+  learning_rate: 1e-3
+  weight_decay: 0.
+  max_grad_norm: 0.5
+  val_every: 1
+  val_num_batches: 256
+  val_num_images: 32
+  scheduler: null
+  scheduler_kwargs: {}
+  ema_kwargs: {}
+  accelerator_kwargs: {}
+  optimizer_name: Adam
+  optimizer_kwargs: {}
+  loss_lambda:
+    recon_loss: 1.
+    quantizer_loss: 1.
+  checkpoint_every: 1000
+  save_results_every: 1000
+  warmup_steps: 1000
+  use_wandb_tracking: True
+  resume: False
+  from_checkpoint: null
+  from_checkpoint_type: null
+
+wandb:
+  project_name: "vitvqganvae"
+  run_name: null
+  kwargs:
+    entity: "heartbeats"

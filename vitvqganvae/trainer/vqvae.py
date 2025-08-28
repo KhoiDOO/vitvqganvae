@@ -39,48 +39,54 @@ DEFAULT_DDP_KWARGS = DistributedDataParallelKwargs(
 )
 
 @dataclass
-class VQVAE2DConfig:
-    num_train_steps: int = 10000
-    batch_size: int = 32
-    num_workers: int = 4
-    pin_memory: bool = True
-    grad_accum_every: int = 1
-    learning_rate: float = 2e-4
-    weight_decay: float = 0.0
-    max_grad_norm: Optional[float] = 0.5
-    val_every: int = 1
-    val_num_batches: int = 5
-    scheduler: Optional[Type[_LRScheduler]] = None
-    scheduler_kwargs: dict = field(default_factory=dict)
-    optimizer: str = "Adam"
-    optimizer_kwargs: dict = field(default_factory=dict)
-    ema_kwargs: dict = field(default_factory=dict)
-    loss_lambda: dict = field(default_factory=dict)
-    checkpoint_every: int = 1000
-    warmup_steps: int = 1000
-    use_wandb_tracking: bool = False
+class VQVAETrainerConfig:
+    num_train_steps: int = 10000,
+    batch_size: int = 32,
+    num_workers: int = 4,
+    pin_memory: bool = True,
+    grad_accum_every: int = 1,
+    learning_rate: float = 2e-4,
+    weight_decay: float = 0.,
+    max_grad_norm: Optional[float] = 0.5,
+    val_every: int = 1,
+    val_num_batches: int = 5,
+    val_num_images: int = 32,
+    scheduler: Optional[Type[_LRScheduler]] = None,
+    scheduler_kwargs: dict = dict(),
+    ema_kwargs: dict = None,
+    accelerator_kwargs: dict = dict(),
+    optimizer_name: str = "Adam",
+    optimizer_kwargs: dict = dict(),
+    loss_lambda: dict = dict(),
+    checkpoint_every: int = 1000,
+    save_results_every: int = 1000,
+    warmup_steps: int = 1000,
+    use_wandb_tracking: bool = False,
+    resume: bool = False,
+    from_checkpoint: str = None,
+    from_checkpoint_type: str = None,
 
 
 @add_wandb_tracker_contextmanager
 @beartype
-class VQVAE2D:
+class VQVAETrainer:
     def __init__(
         self,
         model: Module,
         train_dataset: Dataset,
         val_dataset: Optional[Dataset],
         trial_dir: str,
-        num_train_steps: int,
-        batch_size: int,
-        num_workers: int,
-        pin_memory: bool,
-        grad_accum_every: int,
+        num_train_steps: int = 10000,
+        batch_size: int = 32,
+        num_workers: int = 4,
+        pin_memory: bool = True,
+        grad_accum_every: int = 1,
         learning_rate: float = 2e-4,
         weight_decay: float = 0.,
         max_grad_norm: Optional[float] = 0.5,
-        val_every = 1,
-        val_num_batches = 5,
-        val_num_images = 32,
+        val_every: int = 1,
+        val_num_batches: int = 5,
+        val_num_images: int = 32,
         scheduler: Optional[Type[_LRScheduler]] = None,
         scheduler_kwargs: dict = dict(),
         ema_kwargs: dict = None,
@@ -88,10 +94,10 @@ class VQVAE2D:
         optimizer_name: str = "Adam",
         optimizer_kwargs: dict = dict(),
         loss_lambda: dict = dict(),
-        checkpoint_every = 1000,
-        save_results_every = 1000,
-        warmup_steps = 1000,
-        use_wandb_tracking = False,
+        checkpoint_every: int = 1000,
+        save_results_every: int = 1000,
+        warmup_steps: int = 1000,
+        use_wandb_tracking: bool = False,
         resume: bool = False,
         from_checkpoint: str = None,
         from_checkpoint_type: str = None,
@@ -265,7 +271,7 @@ class VQVAE2D:
         pkg = torch.load(str(path), map_location="cpu", weights_only=False)
 
         # Load model state dict
-        if isinstance(self.model, torch.nn.DataParallel) or isinstance(self.model, torch.nn.parallel.DistributedDataParallel):
+        if isinstance(self._model, torch.nn.DataParallel) or isinstance(self._model, torch.nn.parallel.DistributedDataParallel):
             self._model.module.load_state_dict(pkg['model'])
         else:
             self._model.load_state_dict(pkg['model'])
@@ -297,7 +303,7 @@ class VQVAE2D:
         return forward_kwargs
     
     def forward(self):
-        device = self.device
+        device = self._device
         step = self.step.item()
         train_dl_iter: DataLoader = cycle(self.train_dataloader)
         val_dl_iter: DataLoader = cycle(self.val_dataloader)
@@ -306,33 +312,33 @@ class VQVAE2D:
 
         self._model.train()
 
-        while step < self.num_train_steps:
+        while step < self._num_train_steps:
 
             train_log = {}
 
-            for i in range(self.grad_accum_every):
-                is_last = i == (self.grad_accum_every - 1)
-                maybe_no_sync = partial(self.accelerator.no_sync, self.model) if not is_last else nullcontext
+            for i in range(self._grad_accum_every):
+                is_last = i == (self._grad_accum_every - 1)
+                maybe_no_sync = partial(self.accelerator.no_sync, self._model) if not is_last else nullcontext
 
                 forward_kwargs = self.next_data_to_forward_kwargs(train_dl_iter)
 
                 with self.accelerator.autocast(), maybe_no_sync():
-                    train_loss_dct: dict = self.model(**forward_kwargs)
+                    train_loss_dct: dict = self._model(**forward_kwargs)
                     
                     train_loss = 0.0
                     for key, value in train_loss_dct.items():
-                        if key in self.loss_lambda:
-                            if self.loss_lambda[key] is None:
+                        if key in self._loss_lambda:
+                            if self._loss_lambda[key] is None:
                                 raise ValueError(f"Value for loss_lambda['{key}'] is None.")
-                            value = value * self.loss_lambda[key]
+                            value = value * self._loss_lambda[key]
                         else:
                             raise ValueError(f"Loss key '{key}' not found in loss_lambda dictionary.")
                         train_loss += value
-                    self.accelerator.backward(train_loss / self.grad_accum_every)
+                    self.accelerator.backward(train_loss / self._grad_accum_every)
 
                 accum_log(
                     train_log, 
-                    {key: value / self.grad_accum_every for key, value in train_loss_dct.items()}
+                    {key: value / self._grad_accum_every for key, value in train_loss_dct.items()}
                 )
 
             self.log(
@@ -351,12 +357,12 @@ class VQVAE2D:
 
             self.wait()
 
-            if divisible_by(step, self.val_every):
+            if divisible_by(step, self._val_every):
 
                 val_total_loss_dct = {}
                 self.unwrapped_model.eval()
                 
-                num_val_batches = self.val_num_batches * self.grad_accum_every
+                num_val_batches = self._val_num_batches * self._grad_accum_every
 
                 for _ in range(num_val_batches):
                     with self.accelerator.autocast(), torch.no_grad():

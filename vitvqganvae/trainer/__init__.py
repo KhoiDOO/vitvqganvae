@@ -1,0 +1,1 @@
+from .vqvae import VQVAETrainer, VQVAETrainerConfig

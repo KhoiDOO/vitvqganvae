@@ -17,3 +17,6 @@ def accum_log(log, new_logs: dict):
         old_value = log.get(key, 0.)
         log[key] = old_value + new_value
     return log
+
+def count_parameters(model, requires_grad = True):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad == requires_grad)

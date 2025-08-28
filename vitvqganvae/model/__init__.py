@@ -1,0 +1,1 @@
+from .cnn.vqvae import VQVAE, VQVAEConfig

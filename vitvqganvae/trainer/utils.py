@@ -3,6 +3,11 @@ from typing import Optional, Type
 
 from accelerate import Accelerator
 from functools import partial
+from pathlib import Path
+from packaging import version as packaging_version
+
+from beartype import beartype
+from beartype.typing import Optional
 
 from torch import nn
 from torch.nn import Module
@@ -12,9 +17,36 @@ from torch.optim.lr_scheduler import LambdaLR, _LRScheduler
 from ..utils.helpers import exists
 
 import pytorch_warmup as warmup
+import pickle
+import torch
 
 
 ConstantLRScheduler = partial(LambdaLR, lr_lambda = lambda step: 1.)
+
+
+@contextmanager
+def trackers(
+    trainer,
+    project_name: str,
+    run_name: str = None,
+    hps: dict = None,
+    init_kwargs: dict = None,
+):
+    assert trainer.use_wandb_tracking
+
+    if 'resume' not in init_kwargs:
+        print(f"Initializing W&B trackers... with project name: {project_name} - run name: {run_name} init_kwargs: {init_kwargs}")
+
+    else:
+        print(f"Resuming W&B trackers... with project name: {project_name} - run name: {run_name} init_kwargs: {init_kwargs}")
+
+    trainer.accelerator.init_trackers(project_name=project_name, config=hps, init_kwargs={'wandb' : init_kwargs})
+
+    if run_name is not None and len(trainer.accelerator.trackers) > 0:
+        trainer.accelerator.trackers[0].run.name = run_name
+
+    yield
+    trainer.accelerator.end_training()
 
 
 class OptimizerWithWarmupSchedule(nn.Module):

@@ -1,3 +1,4 @@
+from sympy import true
 from torch import nn, einsum
 from torch.autograd import grad as torch_grad
 
@@ -6,11 +7,14 @@ from einops.layers.torch import Rearrange
 
 from .encoder import Encoder
 from .decoder import Decoder
-from ...utils.model.layer_map import cnn_mapping
-from ...utils.helpers import exists, default
+from ...utils.model.layer_map import cnn_mapping, cnn_2_ndim, rearrange_map
+from ..utils import rebuild_save_load
+from ...utils.helpers import exists, default, count_parameters
+from pytorch_custom_utils import total_parameters
 
 from typing import Union
 from beartype import beartype
+from dataclasses import dataclass, field
 
 import torch.nn.functional as F
 import vector_quantize_pytorch
@@ -19,6 +23,36 @@ import torch
 import copy
 import os
 
+
+@dataclass
+class VQVAEConfig:
+    dim: int = 64
+    in_channel: int = 3
+    out_channel: int = 3
+    layers: int = 4
+    layer_mults: list[int] | None = None
+    num_res_blocks: int = 1
+    group: int = 16
+    conv_type: str = "conv2d"
+    enc_act_func: str = "LeakyReLU"
+    dec_act_func: str = "GLU"
+    enc_act_kwargs: dict = field(default_factory=lambda: {"negative_slope": 0.1})
+    dec_act_kwargs: dict = field(default_factory=lambda: {"dim": 1})
+    first_conv_kernel_size: int = 5
+    quantizer: str = "VectorQuantize"
+    codebook_size: int = 512
+    quantizer_kwargs: dict = field(default_factory=lambda: {
+        "codebook_dim": 64,
+        "decay" : 0.99,
+        "commitment_weight": 0.25,
+        "kmeans_init": True,
+        "use_cosine_sim": True
+    })
+    l2_recon_loss: bool = True
+
+
+@rebuild_save_load()
+@total_parameters()
 @beartype
 class VQVAE(nn.Module):
     def __init__(
@@ -51,8 +85,6 @@ class VQVAE(nn.Module):
 
         if conv_type not in cnn_mapping:
             raise ValueError(f"Unknown conv_type: {conv_type}")
-        if conv_type in ["conv1d", "conv3d"]:
-            raise NotImplementedError(f"VQVAE only supports conv2d for now, got {conv_type}")
 
         self._dim = dim
         self._in_channel = in_channel
@@ -68,6 +100,7 @@ class VQVAE(nn.Module):
         self._dec_act_kwargs = dec_act_kwargs
         self._first_conv_kernel_size = first_conv_kernel_size
         self._dim_divisor = 2 ** layers
+        self._ndim = cnn_2_ndim[conv_type]
 
         self.encoder = Encoder(
 			dim=self._dim,
@@ -104,6 +137,15 @@ class VQVAE(nn.Module):
 
         self._l2_recon_loss = l2_recon_loss
         self.recon_loss_fn = F.mse_loss if l2_recon_loss else F.l1_loss
+
+        print(f"Total parameters in VQVAE: {self.total_parameters}")
+        print(f"Total trainable parameters in VQVAE: {count_parameters(self, True)}")  
+        print(f"Total encoder parameters in VQVAE: {count_parameters(self.encoder)}")
+        print(f"Total encoder trainable parameters in VQVAE: {count_parameters(self.encoder, True)}")
+        print(f"Total decoder parameters in VQVAE: {count_parameters(self.decoder)}")
+        print(f"Total decoder trainable parameters in VQVAE: {count_parameters(self.decoder, True)}")
+        print(f"Total quantizer parameters in VQVAE: {count_parameters(self._quantizer)}")
+        print(f"Total quantizer trainable parameters in VQVAE: {count_parameters(self._quantizer, True)}")
     
     @property
     def device(self) -> torch.device:
@@ -139,21 +181,34 @@ class VQVAE(nn.Module):
 
     def encode(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         x = self.encoder(x)
-        x = rearrange(x, 'b c h w -> b (h w) c')
-        x, indices, vq_aux_loss = self.quantizer(x)
+        x = rearrange(x, rearrange_map[x.ndim])
+        x, indices, vq_aux_loss = self._quantizer(x)
         return x, indices, vq_aux_loss
 
     def decode(self, fmap: torch.Tensor) -> torch.Tensor:
-        # fmap: (B, H*W, C) -> (B, H, W, C) -> (B, C, H, W)
-        batch, hw, c = fmap.shape
-        h = w = int(hw ** 0.5)
-        assert h * w == hw, f"Cannot reshape: {hw} is not a perfect square."
-        fmap = rearrange(fmap, 'b (h w) c -> b h w c', h=h, w=w)
-        fmap = rearrange(fmap, 'b h w c -> b c h w')
-        return self.decoder(fmap)
+        
+        if self._ndim == 3:
+            fmap = rearrange(fmap, 'b h c -> b c h')
+            return self.decoder(fmap)
+        elif self._ndim == 4:
+            batch, hw, c = fmap.shape
+            h = w = int(hw ** 0.5)
+            assert h * w == hw, f"Cannot reshape: {hw} is not a perfect square."
+            fmap = rearrange(fmap, 'b (h w) c -> b h w c', h=h, w=w)
+            fmap = rearrange(fmap, 'b h w c -> b c h w')
+            return self.decoder(fmap)
+        elif self._ndim == 5:
+            batch, dhw, c = fmap.shape
+            d = h = w = round(dhw ** (1/3))
+            assert d * h * w == dhw, f"Cannot reshape: {dhw} is not a perfect cube."
+            fmap = rearrange(fmap, 'b (d h w) c -> b d h w c', d=d, h=h, w=w)
+            fmap = rearrange(fmap, 'b d h w c -> b c d h w')
+            return self.decoder(fmap)
+        else:
+            raise ValueError(f"target_ndim must be 3, 4, or 5, got {self._ndim}")
 
     def decode_from_ids(self, ids: torch.Tensor) -> torch.Tensor:
-        fmap = self.quantizer.get_output_from_indices(ids)
+        fmap = self._quantizer.get_output_from_indices(ids)
         return self.decode(fmap)
 
     def forward(
@@ -162,18 +217,27 @@ class VQVAE(nn.Module):
         return_loss: bool = False,
         return_recons: bool = False
     ) -> dict[str, torch.Tensor] | torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
+        
         conv_type = getattr(self, '_conv_type', 'conv2d')
         device = img.device
         shape = img.shape
         batch = shape[0]
         channels = shape[1]
-        if conv_type == 'conv1d' or conv_type == 'conv3d':
-            raise NotImplementedError(f"VQVAE only supports conv2d for now, got {conv_type}")
+
+        if conv_type == 'conv1d':
+            length = shape[2]
+            assert (length % self._dim_divisor) == 0, f'length must be divisible by {self._dim_divisor}'
+            assert channels == self._in_channel, 'number of channels on audio is not equal to the channels set on this VQVAE'
         elif conv_type == 'conv2d':
             height, width = shape[2], shape[3]
             for dim_name, size in (('height', height), ('width', width)):
                 assert (size % self._dim_divisor) == 0, f'{dim_name} must be divisible by {self._dim_divisor}'
             assert channels == self._in_channel, 'number of channels on image or sketch is not equal to the channels set on this VQVAE'
+        elif conv_type == 'conv3d':
+            depth, height, width = shape[2], shape[3], shape[4]
+            for dim_name, size in (('depth', depth), ('height', height), ('width', width)):
+                assert (size % self._dim_divisor) == 0, f'{dim_name} must be divisible by {self._dim_divisor}'
+            assert channels == self._in_channel, 'number of channels on video is not equal to the channels set on this VQVAE'
         else:
             raise ValueError(f'Unknown conv_type: {conv_type}')
 
@@ -252,3 +316,7 @@ class VQVAE(nn.Module):
     @property
     def quantizer_kwargs(self) -> dict:
         return self._quantizer_kwargs
+
+    @property
+    def ndim(self) -> int:
+        return self._ndim
