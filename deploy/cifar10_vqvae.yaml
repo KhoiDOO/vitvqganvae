@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: foodgendownload
+  name: cifar10vqvae
 spec:
   ttlSecondsAfterFinished: 60
   template:
@@ -12,9 +12,9 @@ spec:
       - name: home
         persistentVolumeClaim:
           claimName: dokh-pvc
-      - name: data
+      - name: project
         persistentVolumeClaim:
-          claimName: dokh-share-pvc
+          claimName: side-prj-share-0
       containers:
       - name: cifar10
         image: kohido/base_dl_cuda129:v0.0.3
@@ -36,7 +36,7 @@ spec:
         - |
             set -e
             df -h
-            cd /mnt/data
+            cd /mnt/project
             if [ ! -d "vitvqganvae" ]; then
               git clone https://${GITHUB_TOKEN}@github.com/KhoiDOO/vitvqganvae.git
             fi
@@ -50,11 +50,11 @@ spec:
               main.py \
               --config config/cifar10_vqvae.yaml \
               --train \
-              --trainer_kwargs.use_wandb_tracking=True
+              trainer_kwargs.use_wandb_tracking=True
 
         volumeMounts:
         - {name: home, mountPath: /workspace}
-        - {name: data, mountPath: /mnt/data}
+        - {name: project, mountPath: /mnt/project}
         resources:
           limits:   { nvidia.com/gpu: 2, cpu: "24",  memory: "64Gi" }
           requests: { nvidia.com/gpu: 2, cpu: "16",  memory: "64Gi" }
