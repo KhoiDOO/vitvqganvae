@@ -11,10 +11,11 @@ COPY ./vitvqganvae /vitvqganvae/vitvqganvae
 COPY ./main.py /vitvqganvae/main.py
 
 CMD wandb login ${WANDB_API_KEY} && accelerate launch \
-    --mixed_precision=fp16 \
+    --mixed_precision=no \
     --num_processes=1 \
     --num_machines=1 \
     --dynamo_backend=no \
     main.py \
     --config config/cifar10_vqvae.yaml \
-    --train
+    --train \
+    trainer_kwargs.use_wandb_tracking=True

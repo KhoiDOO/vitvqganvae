@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: foodgendownload
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      schedulerName: volcano
+      restartPolicy: Never
+      volumes:
+      - name: home
+        persistentVolumeClaim:
+          claimName: dokh-pvc
+      - name: data
+        persistentVolumeClaim:
+          claimName: dokh-share-pvc
+      containers:
+      - name: cifar10
+        image: kohido/base_dl_cuda129:v0.0.3
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        - name: GITHUB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: dokh-secret
+              key: GITHUB_TOKEN
+        - name: WANDB_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: dokh-secret
+              key: WANDB_API_KEY
+        command: ["bash","-lc"]
+        args:
+        - |
+            set -e
+            df -h
+            cd /mnt/data
+            if [ ! -d "vitvqganvae" ]; then
+              git clone https://${GITHUB_TOKEN}@github.com/KhoiDOO/vitvqganvae.git
+            fi
+            cd vitvqganvae/
+            wandb login ${WANDB_API_KEY}
+            accelerate launch \
+              --mixed_precision=fp16 \
+              --num_processes=1 \
+              --num_machines=1 \
+              --dynamo_backend=no \
+              main.py \
+              --config config/cifar10_vqvae.yaml \
+              --train \
+              --trainer_kwargs.use_wandb_tracking=True
+
+        volumeMounts:
+        - {name: home, mountPath: /workspace}
+        - {name: data, mountPath: /mnt/data}
+        resources:
+          limits:   { nvidia.com/gpu: 2, cpu: "24",  memory: "64Gi" }
+          requests: { nvidia.com/gpu: 2, cpu: "16",  memory: "64Gi" }

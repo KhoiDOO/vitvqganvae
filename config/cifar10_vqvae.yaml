@@ -15,12 +15,12 @@ dataset_kwargs:
 model: VQVAE
 model_config: VQVAEConfig
 model_kwargs:
-  dim: 64
+  dim: 128
   in_channel: 3
   out_channel: 3
   layers: 1
   layer_mults: null
-  num_res_blocks: 1
+  num_res_blocks: 0
   group: 4
   conv_type: "conv2d"
   enc_act_func: "LeakyReLU"
