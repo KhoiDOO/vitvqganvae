@@ -7,6 +7,7 @@ from omegaconf import OmegaConf, DictConfig
 from typing import Optional, Any, Union
 
 from sympy import false
+import torchvision
 
 OmegaConf.register_new_resolver("add", lambda a, b: a + b)
 OmegaConf.register_new_resolver("sub", lambda a, b: a - b)
@@ -53,8 +54,10 @@ class ExperimentConfig:
     train: bool = False  # whether to train the model
     resume: bool = False  # whether to resume from a previous run
 
-    ds_type: str = ""
-    ds: dict = field(default_factory=dict)
+    dataset_name: str = 'cifar10'
+    dataset_source: str = 'torchvision'
+    dataset_img_key: str | None = None
+    dataset_kwargs: dict = field(default_factory=dict)
 
     model: str = ""
     model_config: str = ""

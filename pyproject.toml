@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vitvqganvae"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
   { name="KhoiDOO", email="khoido8899@gmail.com" }, # Replace with your actual name and email
 ]
@@ -23,7 +23,8 @@ dependencies = [
   "accelerate==1.10.0",
   "pytorch_custom_utils==0.0.21",
   "ema_pytorch==0.7.7",
-  "pytorch_warmup==0.2.0"
+  "pytorch_warmup==0.2.0",
+  "torchinfo==1.8.0"
 ]
 
 [project.urls]

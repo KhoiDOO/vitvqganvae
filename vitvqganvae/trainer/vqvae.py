@@ -14,6 +14,7 @@ from torch.nn import Module
 from torch.utils.data import Dataset, DataLoader
 from torch.optim import Optimizer, lr_scheduler
 from torch.optim.lr_scheduler import _LRScheduler
+from torchvision.datasets import VisionDataset
 from .utils import OptimizerWithWarmupSchedule
 
 from torchvision.utils import make_grid, save_image
@@ -47,11 +48,11 @@ class VQVAETrainerConfig:
     grad_accum_every: int = 1,
     learning_rate: float = 2e-4,
     weight_decay: float = 0.,
-    max_grad_norm: Optional[float] = 0.5,
+    max_grad_norm: float | None = None,
     val_every: int = 1,
     val_num_batches: int = 5,
     val_num_images: int = 32,
-    scheduler: Optional[Type[_LRScheduler]] = None,
+    scheduler: str | None = None,
     scheduler_kwargs: dict = dict(),
     ema_kwargs: dict = None,
     accelerator_kwargs: dict = dict(),
@@ -63,18 +64,18 @@ class VQVAETrainerConfig:
     warmup_steps: int = 1000,
     use_wandb_tracking: bool = False,
     resume: bool = False,
-    from_checkpoint: str = None,
-    from_checkpoint_type: str = None,
+    from_checkpoint: str | None = None,
+    from_checkpoint_type: str | None = None,
 
 
-@add_wandb_tracker_contextmanager
 @beartype
-class VQVAETrainer:
+@add_wandb_tracker_contextmanager()
+class VQVAETrainer(Module):
     def __init__(
         self,
         model: Module,
         train_dataset: Dataset,
-        val_dataset: Optional[Dataset],
+        valid_dataset: Optional[Dataset],
         trial_dir: str,
         num_train_steps: int = 10000,
         batch_size: int = 32,
@@ -83,11 +84,11 @@ class VQVAETrainer:
         grad_accum_every: int = 1,
         learning_rate: float = 2e-4,
         weight_decay: float = 0.,
-        max_grad_norm: Optional[float] = 0.5,
+        max_grad_norm: float | None = None,
         val_every: int = 1,
         val_num_batches: int = 5,
         val_num_images: int = 32,
-        scheduler: Optional[Type[_LRScheduler]] = None,
+        scheduler: str | None = None,
         scheduler_kwargs: dict = dict(),
         ema_kwargs: dict = None,
         accelerator_kwargs: dict = dict(),
@@ -99,12 +100,14 @@ class VQVAETrainer:
         warmup_steps: int = 1000,
         use_wandb_tracking: bool = False,
         resume: bool = False,
-        from_checkpoint: str = None,
-        from_checkpoint_type: str = None,
+        from_checkpoint: str | None = None,
+        from_checkpoint_type: str | None = None,
     ):
+        super().__init__()
+
         self._model = model
         self._train_dataset = train_dataset
-        self._val_dataset = val_dataset
+        self._valid_dataset = valid_dataset
         self._trial_dir = trial_dir
         self._num_train_steps = num_train_steps
         self._batch_size = batch_size
@@ -154,7 +157,7 @@ class VQVAETrainer:
             **accelerator_kwargs
         )
 
-        optimizer: Optimizer = getattr(opt, self._optimizer)(
+        optimizer: Optimizer = getattr(opt, self._optimizer_name)(
             [t for t in self._model.parameters() if t.requires_grad],
             lr=self._learning_rate * self._warmup_steps if self._warmup_steps > 0 else self._learning_rate,
             weight_decay=self._weight_decay,
@@ -182,7 +185,7 @@ class VQVAETrainer:
         )
     
         self.val_dataloader = DataLoader(
-            self._val_dataset,
+            self._valid_dataset,
             batch_size=self._batch_size,
             num_workers=self._num_workers,
             pin_memory=self._pin_memory,
@@ -190,12 +193,20 @@ class VQVAETrainer:
             drop_last=False,
         )
 
+        self.custom_make_grid = None
+        if isinstance(self._train_dataset.dataset, VisionDataset):
+            from ..data import tv
+            self.custom_make_grid = getattr(tv, f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}", None)
+        
+        if self.custom_make_grid is None:
+            raise NotImplementedError("Custom make_grid function not found.")
+        print(f"Custom make_grid function: {self.custom_make_grid.__name__ if self.custom_make_grid else None}")
         (
             self._model,
             self.train_dataloader,
             self.val_dataloader,
-            self.optimizer, 
-            self.optimizer.scheduler,
+            self.optimizer.optimizer, 
+            self.optimizer.scheduler
         ) = self.accelerator.prepare(
             self._model,
             self.train_dataloader,
@@ -208,6 +219,7 @@ class VQVAETrainer:
         if self.use_ema:
             self.ema_model = EMA(model, **self._ema_kwargs)
             self.ema_model = self.accelerator.prepare(self.ema_model)
+            print(f"Total EMA model parameters: {sum(p.numel() for p in self.ema_model.parameters())}")
 
     @property
     def device(self):
@@ -295,7 +307,7 @@ class VQVAETrainer:
         data = next(dl_iter)
 
         forward_kwargs = {
-            'img': data[0],
+            'img': data,
             'return_loss': True,
             'return_recons': False
         }
@@ -303,7 +315,7 @@ class VQVAETrainer:
         return forward_kwargs
     
     def forward(self):
-        device = self._device
+        device = self.device
         step = self.step.item()
         train_dl_iter: DataLoader = cycle(self.train_dataloader)
         val_dl_iter: DataLoader = cycle(self.val_dataloader)
@@ -402,7 +414,7 @@ class VQVAETrainer:
                 if self.use_ema:
                     self.save_ema(os.path.join(self.checkpoint_folder, f'model_ckpt_ema_{step}.pt'))
 
-            if self.main and divisible_by(step, self._save_results_every):
+            if self.is_main and divisible_by(step, self._save_results_every):
                 models_to_evaluate = ((self._model, str(step)),)
                 if self.use_ema:
                     models_to_evaluate += ((self.ema_model.ema_model, f"{step}_ema"),)
@@ -410,17 +422,22 @@ class VQVAETrainer:
                 for model, filename in models_to_evaluate:
                     model.eval()
 
-                    val_data = next(self.val_dataloader)
+                    val_data = next(val_dl_iter)
 
-                    _, recons = model(val_data, return_recons = True)
+                    recons = model(val_data, return_recons = True)
 
-                    imgs_and_recons = torch.stack((val_data, recons), dim = 0)
-                    imgs_and_recons = rearrange(imgs_and_recons, 'r b ... -> (b r) ...')
+                    # imgs_and_recons = torch.stack((val_data, recons), dim = 0)
+                    # imgs_and_recons = rearrange(imgs_and_recons, 'r b ... -> (b r) ...')
 
-                    imgs_and_recons = imgs_and_recons.detach().cpu().float().clamp(0., 1.)
-                    grid = make_grid(imgs_and_recons, nrow = 2, normalize = True, value_range = (0, 1))
+                    # imgs_and_recons = imgs_and_recons.detach().cpu().float().clamp(0., 1.)
+                    # if self.custom_make_grid:
+                    #     grid = self.custom_make_grid(imgs_and_recons, nrow = 2)
+                    # else:
+                    #     grid = make_grid(imgs_and_recons, nrow = 2, normalize = True, value_range = (0, 1))
 
-                    save_image(grid, str(self.generation_folder / f'{filename}.png'))
+                    grid = self.custom_make_grid(val_data, recons, nrow=2)
+
+                    save_image(grid, os.path.join(self.generation_folder, f'{filename}.png'))
 
             # if self.is_main and divisible_by(step, 200):
             #     self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_last.pt'))
@@ -438,8 +455,8 @@ class VQVAETrainer:
         return self._train_dataset
 
     @property
-    def val_dataset(self):
-        return self._val_dataset
+    def valid_dataset(self):
+        return self._valid_dataset
 
     @property
     def trial_dir(self):

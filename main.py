@@ -1,11 +1,19 @@
 import os
 import argparse
 
-from vitvqganvae.utils.config import ExperimentConfig, load_config, parse_structured, config_to_primitive
-from vitvqganvae import model, trainer
+from omegaconf import OmegaConf
+
+from vitvqganvae.utils.config import (
+    ExperimentConfig, 
+    load_config, 
+    parse_structured, 
+    config_to_primitive,
+    dump_config
+)
+from vitvqganvae import model, trainer, data
 from vitvqganvae.trainer.utils import trackers
 
-from accelerate.utils import DistributedDataParallelKwargs
+from torchinfo import summary
 
 
 def main(args, extras):
@@ -29,8 +37,20 @@ def main(args, extras):
         "train": args.train,
         "resume": args.resume
     })
+
+    print(f"Running with {n_gpus} GPU(s): {', '.join(selected_gpus)}")
+    dump_config(os.path.join(cfg.trial_dir, "config.yaml"), cfg)
     
     # dataset
+    if cfg.dataset_source == "torchvision":
+        from vitvqganvae.data import tv
+        from vitvqganvae.data.tv.wrapper import TVDataset
+        dataset_getter = getattr(tv, f"get_{cfg.dataset_name}")
+        train_ds, valid_ds = dataset_getter(**cfg.dataset_kwargs)
+        train_ds, valid_ds = TVDataset(train_ds, cfg.dataset_img_key), TVDataset(valid_ds, cfg.dataset_img_key)
+
+    print(f'Number of training samples: {len(train_ds)}')
+    print(f'Number of validation samples: {len(valid_ds)}')
 
     # model
     model_config_cls = getattr(model, cfg.model_config)
@@ -38,12 +58,34 @@ def main(args, extras):
     model_config = config_to_primitive(model_config)
     model_cls = getattr(model, cfg.model)
     model_module = model_cls(**model_config)
+    # summary(model_module, input_size=(5, 3, 32, 32))
 
     # trainer
-    # trainer_config_cls = getattr(trainer, cfg.trainer_config)
-    # trainer_config = parse_structured(trainer_config_cls, cfg.trainer_kwargs)
-    # trainer_cls = getattr(trainer, cfg.trainer)
-    # trainer_module = trainer_cls(**trainer_config)
+    trainer_config_cls = getattr(trainer, cfg.trainer_config)
+    trainer_config = parse_structured(trainer_config_cls, cfg.trainer_kwargs)
+    trainer_config = config_to_primitive(trainer_config)
+    trainer_cls = getattr(trainer, cfg.trainer)
+    trainer_module = trainer_cls(
+        model=model_module,
+        train_dataset=train_ds,
+        valid_dataset=valid_ds,
+        trial_dir=cfg.trial_dir,
+        **trainer_config
+    )
+
+    print(f"Trial directory: {trainer_module.trial_dir}")
+
+    if cfg.trainer_kwargs.use_wandb_tracking:
+        with trackers(
+            trainer_module, 
+            project_name=cfg.wandb['project_name'], 
+            run_name=cfg.wandb['run_name'],
+            hps=config_to_primitive(config=cfg, resolve=True), 
+            init_kwargs=cfg.wandb['kwargs']
+        ):
+            trainer_module()
+    else:
+        trainer_module()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

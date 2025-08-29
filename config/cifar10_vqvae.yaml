@@ -5,16 +5,23 @@ trial_dir: ""
 n_gpus: 1
 seed: 42
 
+dataset_name: cifar10
+dataset_source: torchvision
+dataset_img_key: null
+dataset_kwargs:
+  root: ./.cache/${dataset_name}
+  download: True
+
 model: VQVAE
 model_config: VQVAEConfig
 model_kwargs:
-  dim: 128
+  dim: 64
   in_channel: 3
   out_channel: 3
-  layers: 2
+  layers: 1
   layer_mults: null
-  num_res_blocks: 2
-  group: 16
+  num_res_blocks: 1
+  group: 4
   conv_type: "conv2d"
   enc_act_func: "LeakyReLU"
   dec_act_func: "GLU"
@@ -22,7 +29,7 @@ model_kwargs:
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 5
   quantizer: "VectorQuantize"
-  codebook_size: 512
+  codebook_size: 256
   quantizer_kwargs: {
       "codebook_dim": 64,
       "decay" : 0.99,
@@ -36,18 +43,20 @@ trainer: VQVAETrainer
 trainer_config: VQVAETrainerConfig
 trainer_kwargs:
   num_train_steps: 15000
-  batch_size: 256
+  batch_size: 512
   num_workers: 16
   pin_memory: True
   grad_accum_every: 1
-  learning_rate: 1e-3
+  learning_rate: 1e-2
   weight_decay: 0.
-  max_grad_norm: 0.5
-  val_every: 1
-  val_num_batches: 256
+  max_grad_norm: null
+  val_every: 500
+  val_num_batches: 20
   val_num_images: 32
-  scheduler: null
-  scheduler_kwargs: {}
+  scheduler: CosineAnnealingLR
+  scheduler_kwargs:
+    T_max: "${sub: ${trainer_kwargs.num_train_steps}, ${trainer_kwargs.warmup_steps}}"
+    eta_min: 5e-05
   ema_kwargs: {}
   accelerator_kwargs: {}
   optimizer_name: Adam
@@ -55,10 +64,10 @@ trainer_kwargs:
   loss_lambda:
     recon_loss: 1.
     quantizer_loss: 1.
-  checkpoint_every: 1000
-  save_results_every: 1000
-  warmup_steps: 1000
-  use_wandb_tracking: True
+  checkpoint_every: 500
+  save_results_every: 500
+  warmup_steps: 0
+  use_wandb_tracking: False
   resume: False
   from_checkpoint: null
   from_checkpoint_type: null

@@ -194,15 +194,15 @@ class VQVAE(nn.Module):
             batch, hw, c = fmap.shape
             h = w = int(hw ** 0.5)
             assert h * w == hw, f"Cannot reshape: {hw} is not a perfect square."
-            fmap = rearrange(fmap, 'b (h w) c -> b h w c', h=h, w=w)
-            fmap = rearrange(fmap, 'b h w c -> b c h w')
+            fmap = rearrange(fmap, 'b (h w) c -> b c h w', h=h, w=w)
+            # fmap = rearrange(fmap, 'b h w c -> b c h w')
             return self.decoder(fmap)
         elif self._ndim == 5:
             batch, dhw, c = fmap.shape
             d = h = w = round(dhw ** (1/3))
             assert d * h * w == dhw, f"Cannot reshape: {dhw} is not a perfect cube."
-            fmap = rearrange(fmap, 'b (d h w) c -> b d h w c', d=d, h=h, w=w)
-            fmap = rearrange(fmap, 'b d h w c -> b c d h w')
+            fmap = rearrange(fmap, 'b (d h w) c -> b c d h w', d=d, h=h, w=w)
+            # fmap = rearrange(fmap, 'b d h w c -> b c d h w')
             return self.decoder(fmap)
         else:
             raise ValueError(f"target_ndim must be 3, 4, or 5, got {self._ndim}")
@@ -251,7 +251,7 @@ class VQVAE(nn.Module):
         if return_recons:
             return recon_loss, fmap
 
-        return {"recon_loss": recon_loss, "quantizer_loss": commit_loss}
+        return {"recon_loss": recon_loss, "quantizer_loss": commit_loss.mean()}
 
     @property
     def dim(self) -> int:
