@@ -15,6 +15,10 @@ spec:
       - name: project
         persistentVolumeClaim:
           claimName: side-prj-share-0
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 16Gi
       containers:
       - name: cifar10
         image: kohido/base_dl_cuda129:v0.0.3
@@ -55,6 +59,7 @@ spec:
         volumeMounts:
         - {name: home, mountPath: /workspace}
         - {name: project, mountPath: /mnt/project}
+        - {name: dshm, mountPath: /dev/shm}
         resources:
           limits:   { nvidia.com/gpu: 2, cpu: "24",  memory: "64Gi" }
           requests: { nvidia.com/gpu: 2, cpu: "16",  memory: "64Gi" }
