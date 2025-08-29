@@ -1,4 +1,4 @@
-name: cifar10_vqvae
+name: cifar10_vqvae_lfq
 exp_root_dir: outputs
 exp_dir: ""
 trial_dir: ""
@@ -28,14 +28,11 @@ model_kwargs:
   enc_act_kwargs: {"negative_slope": 0.1}
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 5
-  quantizer: "VectorQuantize"
-  codebook_size: 512
+  quantizer: "LFQ"
+  codebook_size: 1024
   quantizer_kwargs: {
-      "codebook_dim": 64,
-      "decay" : 0.99,
-      "commitment_weight": 0.25,
-      "kmeans_init": True,
-      "use_cosine_sim": True
+      "diversity_gamma": 4.,
+      "entropy_loss_weight": 0.1
   }
   l2_recon_loss: True
 

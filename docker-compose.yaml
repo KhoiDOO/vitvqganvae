@@ -2,15 +2,13 @@ services:
   vitvqganvae-train-cifar10:
     build:
       context: .
-      dockerfile: cifar10.dockerfile
+      dockerfile: docker/cifar10.dockerfile
     image: vitvqganvae:cifar10_v0.0.1
     shm_size: '16g'
     volumes:
-      - ./data_source:/git/vitvqganvae/data_source  # Mount local data directory
-      - ./outputs:/git/vitvqganvae/outputs  # Mount local result directory
+      - ./.cache:/vitvqganvae/.cache  # Mount local data directory
+      - ./outputs:/vitvqganvae/outputs  # Mount local result directory
     environment:
-      - WANDB_PROJECT_NAME=${WANDB_PROJECT_NAME}
-      - WANDB_ENTITY=${WANDB_ENTITY}
       - WANDB_API_KEY=${WANDB_API_KEY}
     deploy:
       resources:
