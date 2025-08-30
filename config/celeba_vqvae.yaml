@@ -18,7 +18,7 @@ model_kwargs:
   dim: 128
   in_channel: 3
   out_channel: 3
-  layers: 3
+  layers: 2
   layer_mults: null
   num_res_blocks: 1
   group: 8
