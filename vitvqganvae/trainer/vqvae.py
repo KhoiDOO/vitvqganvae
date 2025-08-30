@@ -365,7 +365,10 @@ class VQVAETrainer(Module):
             self.optimizer.zero_grad()
 
             if self.use_ema:
-                self.ema_model.update()
+                if self.is_distributed:
+                    self.ema_model.module.update()
+                else:
+                    self.ema_model.update()
 
             step += 1
             self.step.add_(1)
