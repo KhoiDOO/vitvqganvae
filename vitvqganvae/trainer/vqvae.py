@@ -327,6 +327,8 @@ class VQVAETrainer(Module):
 
         self._model.train()
 
+        ema_model = self.ema_model.module if self.is_distributed else self.ema_model
+
         while step < self._num_train_steps:
 
             train_log = {}
@@ -365,11 +367,7 @@ class VQVAETrainer(Module):
             self.optimizer.zero_grad()
 
             if self.use_ema:
-                print(self.is_distributed)
-                if self.is_distributed:
-                    self.ema_model.module.update()
-                else:
-                    self.ema_model.update()
+                ema_model.update()
 
             step += 1
             self.step.add_(1)
@@ -424,7 +422,7 @@ class VQVAETrainer(Module):
             if self.is_main and divisible_by(step, self._save_results_every):
                 models_to_evaluate = ((self._model, str(step)),)
                 if self.use_ema:
-                    models_to_evaluate += ((self.ema_model.ema_model, f"{step}_ema"),)
+                    models_to_evaluate += ((ema_model.ema_model, f"{step}_ema"),)
 
                 for model, filename in models_to_evaluate:
                     model.eval()
