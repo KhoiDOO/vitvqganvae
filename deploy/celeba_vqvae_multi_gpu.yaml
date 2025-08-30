@@ -21,7 +21,7 @@ spec:
           sizeLimit: 32Gi
       containers:
       - name: celeba
-        image: kohido/base_dl_cuda129:v0.0.3
+        image: kohido/base_dl_cuda129:v0.0.6
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
