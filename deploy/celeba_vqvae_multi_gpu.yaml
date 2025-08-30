@@ -49,7 +49,7 @@ spec:
               cd vitvqganvae/
             fi
             wandb login ${WANDB_API_KEY}
-            export CUDA_VISIBLE_DEVICES="0,1"
+            # export CUDA_VISIBLE_DEVICES="0,1"
             accelerate launch \
               --mixed_precision=no \
               --num_processes=2 \
@@ -57,6 +57,7 @@ spec:
               --dynamo_backend=no \
               main.py \
               --config config/celeba_vqvae.yaml \
+              --gpu "0,1" \
               --train \
               trainer_kwargs.use_wandb_tracking=True
 
