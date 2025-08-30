@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dokh-cifar10vqvae
+  name: dokh-celebavqvae
 spec:
   ttlSecondsAfterFinished: 60
   template:
@@ -18,9 +18,9 @@ spec:
       - name: dshm
         emptyDir:
           medium: Memory
-          sizeLimit: 16Gi
+          sizeLimit: 32Gi
       containers:
-      - name: cifar10
+      - name: celeba
         image: kohido/base_dl_cuda129:v0.0.3
         env:
         - name: PYTHONUNBUFFERED
@@ -52,7 +52,7 @@ spec:
               --num_machines=1 \
               --dynamo_backend=no \
               main.py \
-              --config config/cifar10_vqvae.yaml \
+              --config config/celeba_vqvae.yaml \
               --train \
               trainer_kwargs.use_wandb_tracking=True
 

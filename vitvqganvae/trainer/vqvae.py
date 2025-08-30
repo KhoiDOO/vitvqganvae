@@ -15,6 +15,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.optim import Optimizer, lr_scheduler
 from torch.optim.lr_scheduler import _LRScheduler
 from torchvision.datasets import VisionDataset
+from ..data.utils import ConcatDataset
 from .utils import OptimizerWithWarmupSchedule
 
 from torchvision.utils import make_grid, save_image
@@ -194,13 +195,15 @@ class VQVAETrainer(Module):
         )
 
         self.custom_make_grid = None
-        if isinstance(self._train_dataset.dataset, VisionDataset):
+        if isinstance(self._train_dataset.dataset, VisionDataset) or isinstance(self._train_dataset.dataset, ConcatDataset):
+            print(f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}")
             from ..data import tv
             self.custom_make_grid = getattr(tv, f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}", None)
         
         if self.custom_make_grid is None:
             raise NotImplementedError("Custom make_grid function not found.")
         print(f"Custom make_grid function: {self.custom_make_grid.__name__ if self.custom_make_grid else None}")
+        
         (
             self._model,
             self.train_dataloader,

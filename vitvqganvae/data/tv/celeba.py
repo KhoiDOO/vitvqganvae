@@ -4,7 +4,7 @@ from torchvision.datasets import CelebA
 from torchvision import transforms
 from torchvision.utils import make_grid
 
-from torch.utils.data import ConcatDataset
+from ..utils import ConcatDataset
 
 import torch
 
@@ -22,8 +22,10 @@ def get_celeba(root: str | None = None, download: bool = True) -> CelebA:
         split="train",
         download=download,
         transform=transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.CenterCrop(148),
+            transforms.Resize(64),
             transforms.ToTensor(),
-            # transforms.RandomHorizontalFlip(),
             transforms.Normalize((0.5,0.5,0.5), (1.0,1.0,1.0))
         ])
     )
@@ -33,6 +35,8 @@ def get_celeba(root: str | None = None, download: bool = True) -> CelebA:
         split="valid",
         download=download,
         transform=transforms.Compose([
+            transforms.CenterCrop(148),
+            transforms.Resize(64),
             transforms.ToTensor(),
             transforms.Normalize((0.5,0.5,0.5), (1.0,1.0,1.0))
         ])
@@ -43,6 +47,8 @@ def get_celeba(root: str | None = None, download: bool = True) -> CelebA:
         split="test",
         download=download,
         transform=transforms.Compose([
+            transforms.CenterCrop(148),
+            transforms.Resize(64),
             transforms.ToTensor(),
             transforms.Normalize((0.5,0.5,0.5), (1.0,1.0,1.0))
         ])
