@@ -191,7 +191,7 @@ class VQVAETrainer(Module):
             num_workers=self._num_workers,
             pin_memory=self._pin_memory,
             shuffle=False,
-            drop_last=False,
+            drop_last=True,
         )
 
         self.custom_make_grid = None
@@ -447,7 +447,7 @@ class VQVAETrainer(Module):
             # if self.is_main and divisible_by(step, 200):
             #     self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_last.pt'))
 
-            self.wait()
+            # self.wait()
 
         self.print('training complete')
 
