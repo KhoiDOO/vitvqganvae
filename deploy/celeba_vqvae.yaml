@@ -41,10 +41,13 @@ spec:
             set -e
             df -h
             cd /mnt/project
-            if [ ! -d "vitvqganvae" ]; then
+            if [ -d "vitvqganvae" ]; then
+              cd vitvqganvae
+              git pull
+            else
               git clone https://${GITHUB_TOKEN}@github.com/KhoiDOO/vitvqganvae.git
+              cd vitvqganvae/
             fi
-            cd vitvqganvae/
             wandb login ${WANDB_API_KEY}
             accelerate launch \
               --mixed_precision=no \
