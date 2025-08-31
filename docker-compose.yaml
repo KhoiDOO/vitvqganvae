@@ -17,6 +17,26 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+  
+  vitvqganvae-train-cifar10-dev:
+    build:
+      context: .
+      dockerfile: docker/cifar10_dev.dockerfile
+    image: vitvqganvae:cifar10_dev_v0.0.1
+    shm_size: '16g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  # Mount local data directory
+      - ./outputs:/vitvqganvae/outputs  # Mount local result directory
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
   vitvqganvae-train-celeba:
     build:
       context: .
