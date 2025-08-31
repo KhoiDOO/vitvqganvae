@@ -402,14 +402,10 @@ class VQVAETrainer(Module):
 
                 self._model.train()
 
-            self.wait()
-
             if self.is_main and divisible_by(step, self._checkpoint_every):
                 self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_{step}.pt'))
                 if self.use_ema:
                     self.save_ema(os.path.join(self.checkpoint_folder, f'model_ckpt_ema_{step}.pt'))
-            
-            self.wait()
 
             if self.is_main and divisible_by(step, self._save_results_every):
                 models_to_evaluate = ((self.unwrapped_model, str(step)),)
@@ -429,8 +425,6 @@ class VQVAETrainer(Module):
                     save_image(grid, os.path.join(self.generation_folder, f'{filename}.png'))
                     
                     model.train()
-
-            self.wait()
 
         self.print('training complete')
 
