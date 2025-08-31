@@ -190,7 +190,7 @@ class VQVAETrainer(Module):
             batch_size=self._batch_size,
             num_workers=self._num_workers,
             pin_memory=self._pin_memory,
-            shuffle=False,
+            shuffle=True,
             drop_last=True,
         )
 
@@ -372,66 +372,65 @@ class VQVAETrainer(Module):
             step += 1
             self.step.add_(1)
 
-            if divisible_by(step, self._val_every):
+            self.wait()
 
-                val_total_loss_dct = {}
-                self.unwrapped_model.eval()
+            if divisible_by(step, self._val_every) or step == self._num_train_steps:
+                self._model.eval()
                 
-                num_val_batches = self._val_num_batches * self._grad_accum_every
-
-                for _ in range(num_val_batches):
-                    with self.accelerator.autocast(), torch.no_grad():
-
+                val_total_loss_dct = {}
+                
+                if step == self._num_train_steps:
+                    num_val_batches = len(self.val_dataloader)
+                else:
+                    num_val_batches = self._val_num_batches
+                
+                with torch.no_grad():
+                    for _ in range(num_val_batches):
                         forward_kwargs = self.next_data_to_forward_kwargs(val_dl_iter)
+                        val_loss_dct = self._model(**forward_kwargs)
+                        accum_log(val_total_loss_dct, val_loss_dct)
 
-                        val_loss_dct = self.unwrapped_model(**forward_kwargs)
+                for key in val_total_loss_dct:
+                    val_total_loss_dct[key] /= num_val_batches
 
-                        accum_log(
-                            val_total_loss_dct,
-                            {f"val_{key}": value / num_val_batches for key, value in val_loss_dct.items()}
-                        )
+                gathered_losses = self.accelerator.gather_for_metrics(val_total_loss_dct)
 
-                self.log(**val_total_loss_dct)
+                if self.is_main:
+                    final_val_losses = {f"val_{key}": value.mean().item() for key, value in gathered_losses.items()}
+                    self.log(**final_val_losses)
+                    self.print(f"Step {step}: Train Loss: {train_loss.item()} - Validation Loss: {final_val_losses}")
 
-                self.print(f"Step {step}: Train Loss: {train_loss.item()} - Validation Loss: {val_total_loss_dct}")
-
-                self.unwrapped_model.train()
+                self._model.train()
 
             self.wait()
 
             if self.is_main and divisible_by(step, self._checkpoint_every):
-
-                # extracted_val_loss = val_total_loss_dct['val_loss'].item()
-                # if extracted_val_loss <= best_loss:
-                #     save_path = os.path.join(self.checkpoint_folder, f'model_ckpt_best.pt')
-                #     self.save(save_path)
-                #     best_loss = val_total_loss_dct['val_loss']
-
                 self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_{step}.pt'))
-
                 if self.use_ema:
                     self.save_ema(os.path.join(self.checkpoint_folder, f'model_ckpt_ema_{step}.pt'))
+            
+            self.wait()
 
             if self.is_main and divisible_by(step, self._save_results_every):
-                models_to_evaluate = ((self._model, str(step)),)
+                models_to_evaluate = ((self.unwrapped_model, str(step)),)
                 if self.use_ema:
-                    models_to_evaluate += ((ema_model.ema_model, f"{step}_ema"),)
+                    models_to_evaluate += ((self.unwrapped_ema_model, f"{step}_ema"),)
 
                 for model, filename in models_to_evaluate:
                     model.eval()
 
-                    val_data = next(val_dl_iter).to(self.device)
+                    val_data = next(val_dl_iter)
+                    val_data = val_data[:self._val_num_images].to(self.device)
 
-                    recons = model(val_data, return_recons = True)
+                    _, recons = model(val_data, return_loss = True, return_recons = True)
 
                     grid = self.custom_make_grid(val_data, recons, nrow=2)
 
                     save_image(grid, os.path.join(self.generation_folder, f'{filename}.png'))
+                    
+                    model.train()
 
-            # if self.is_main and divisible_by(step, 200):
-            #     self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_last.pt'))
-
-            # self.wait()
+            self.wait()
 
         self.print('training complete')
 
@@ -546,3 +545,4 @@ class VQVAETrainer(Module):
     @property
     def from_checkpoint_type(self):
         return self._from_checkpoint_type
+
