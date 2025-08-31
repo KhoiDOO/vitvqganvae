@@ -15,6 +15,8 @@ from vitvqganvae.trainer.utils import trackers
 
 from torchinfo import summary
 
+from vitvqganvae.utils.helpers import set_seed
+
 
 def main(args, extras):
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -37,6 +39,8 @@ def main(args, extras):
         "train": args.train,
         "resume": args.resume
     })
+
+    set_seed(cfg.seed)
 
     print(f"Running with {n_gpus} GPU(s): {', '.join(selected_gpus)}")
     dump_config(os.path.join(cfg.trial_dir, "config.yaml"), cfg)

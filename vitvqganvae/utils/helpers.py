@@ -1,3 +1,7 @@
+import torch
+import random
+import numpy as np
+
 def exists(val):
     return val is not None
 
@@ -20,3 +24,11 @@ def accum_log(log, new_logs: dict):
 
 def count_parameters(model, requires_grad = True):
     return sum(p.numel() for p in model.parameters() if p.requires_grad == requires_grad)
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False

@@ -226,7 +226,7 @@ class VQVAETrainer(Module):
 
     @property
     def device(self):
-        return self.unwrapped_model.device
+        return self.accelerator.device
 
     @property
     def is_main(self):
@@ -310,7 +310,7 @@ class VQVAETrainer(Module):
         data = next(dl_iter)
 
         forward_kwargs = {
-            'img': data,
+            'img': data.to(self.device),
             'return_loss': True,
             'return_recons': False
         }
@@ -372,8 +372,6 @@ class VQVAETrainer(Module):
             step += 1
             self.step.add_(1)
 
-            self.wait()
-
             if divisible_by(step, self._val_every):
 
                 val_total_loss_dct = {}
@@ -392,11 +390,6 @@ class VQVAETrainer(Module):
                             val_total_loss_dct,
                             {f"val_{key}": value / num_val_batches for key, value in val_loss_dct.items()}
                         )
-
-                        # for key, value in val_loss_dct.items():
-                        #     if f"val_{key}" not in val_total_loss_dct:
-                        #         val_total_loss_dct[f"val_{key}"] = 0.0
-                        #     val_total_loss_dct[f"val_{key}"] += (value / num_val_batches)
 
                 self.log(**val_total_loss_dct)
 
@@ -427,18 +420,9 @@ class VQVAETrainer(Module):
                 for model, filename in models_to_evaluate:
                     model.eval()
 
-                    val_data = next(val_dl_iter)
+                    val_data = next(val_dl_iter).to(self.device)
 
                     recons = model(val_data, return_recons = True)
-
-                    # imgs_and_recons = torch.stack((val_data, recons), dim = 0)
-                    # imgs_and_recons = rearrange(imgs_and_recons, 'r b ... -> (b r) ...')
-
-                    # imgs_and_recons = imgs_and_recons.detach().cpu().float().clamp(0., 1.)
-                    # if self.custom_make_grid:
-                    #     grid = self.custom_make_grid(imgs_and_recons, nrow = 2)
-                    # else:
-                    #     grid = make_grid(imgs_and_recons, nrow = 2, normalize = True, value_range = (0, 1))
 
                     grid = self.custom_make_grid(val_data, recons, nrow=2)
 

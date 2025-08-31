@@ -1,4 +1,4 @@
-FROM kohido/base_dl_cuda129:v0.0.4
+FROM kohido/base_dl_cuda129:v0.0.6
 
 ENV DEBIAN_FRONTEND=noninteractive
 
