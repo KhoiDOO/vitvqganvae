@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dokh-celebavqvae
+  name: dokh-celebavqvae-mg-4
 spec:
   ttlSecondsAfterFinished: 60
   template:
@@ -49,15 +49,14 @@ spec:
               cd vitvqganvae/
             fi
             wandb login ${WANDB_API_KEY}
-            # export CUDA_VISIBLE_DEVICES="0,1"
             accelerate launch \
               --mixed_precision=no \
-              --num_processes=2 \
+              --num_processes=4 \
               --num_machines=1 \
               --dynamo_backend=no \
               main.py \
               --config config/celeba_vqvae.yaml \
-              --gpu "0,1" \
+              --gpu "0,1,2,3" \
               --train \
               trainer_kwargs.use_wandb_tracking=True
 
@@ -66,5 +65,5 @@ spec:
         - {name: project, mountPath: /mnt/project}
         - {name: dshm, mountPath: /dev/shm}
         resources:
-          limits:   { nvidia.com/gpu: 2, cpu: "24",  memory: "64Gi" }
-          requests: { nvidia.com/gpu: 2, cpu: "16",  memory: "64Gi" }
+          limits:   { nvidia.com/gpu: 4, cpu: "24",  memory: "64Gi" }
+          requests: { nvidia.com/gpu: 4, cpu: "16",  memory: "64Gi" }
