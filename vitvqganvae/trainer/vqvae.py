@@ -60,8 +60,8 @@ class VQVAETrainerConfig:
     optimizer_name: str = "Adam",
     optimizer_kwargs: dict = dict(),
     loss_lambda: dict = dict(),
-    checkpoint_every: int = 1000,
-    save_results_every: int = 1000,
+    checkpoint_every: int | None = None,
+    save_results_every: int | None = None,
     warmup_steps: int = 1000,
     use_wandb_tracking: bool = False,
     resume: bool = False,
@@ -96,8 +96,8 @@ class VQVAETrainer(Module):
         optimizer_name: str = "Adam",
         optimizer_kwargs: dict = dict(),
         loss_lambda: dict = dict(),
-        checkpoint_every: int = 1000,
-        save_results_every: int = 1000,
+        checkpoint_every: int | None = None,
+        save_results_every: int | None = None,
         warmup_steps: int = 1000,
         use_wandb_tracking: bool = False,
         resume: bool = False,
@@ -190,7 +190,7 @@ class VQVAETrainer(Module):
             batch_size=self._batch_size,
             num_workers=self._num_workers,
             pin_memory=self._pin_memory,
-            shuffle=True,
+            shuffle=False,
             drop_last=True,
         )
 
@@ -402,29 +402,31 @@ class VQVAETrainer(Module):
 
                 self._model.train()
 
-            if self.is_main and divisible_by(step, self._checkpoint_every):
-                self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_{step}.pt'))
-                if self.use_ema:
-                    self.save_ema(os.path.join(self.checkpoint_folder, f'model_ckpt_ema_{step}.pt'))
+            if self._checkpoint_every:
+                if self.is_main and divisible_by(step, self._checkpoint_every):
+                    self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_{step}.pt'))
+                    if self.use_ema:
+                        self.save_ema(os.path.join(self.checkpoint_folder, f'model_ckpt_ema_{step}.pt'))
 
-            if self.is_main and divisible_by(step, self._save_results_every):
-                models_to_evaluate = ((self.unwrapped_model, str(step)),)
-                if self.use_ema:
-                    models_to_evaluate += ((self.unwrapped_ema_model, f"{step}_ema"),)
+            if self._save_results_every:
+                if self.is_main and divisible_by(step, self._save_results_every):
+                    models_to_evaluate = ((self.unwrapped_model, str(step)),)
+                    if self.use_ema:
+                        models_to_evaluate += ((self.unwrapped_ema_model, f"{step}_ema"),)
 
-                for model, filename in models_to_evaluate:
-                    model.eval()
+                    for model, filename in models_to_evaluate:
+                        model.eval()
 
-                    val_data = next(val_dl_iter)
-                    val_data = val_data[:self._val_num_images].to(self.device)
+                        val_data = next(val_dl_iter)
+                        val_data = val_data[:self._val_num_images].to(self.device)
 
-                    _, recons = model(val_data, return_loss = True, return_recons = True)
+                        _, recons = model(val_data, return_loss = True, return_recons = True)
 
-                    grid = self.custom_make_grid(val_data, recons, nrow=2)
+                        grid = self.custom_make_grid(val_data, recons, nrow=2)
 
-                    save_image(grid, os.path.join(self.generation_folder, f'{filename}.png'))
-                    
-                    model.train()
+                        save_image(grid, os.path.join(self.generation_folder, f'{filename}.png'))
+                        
+                        model.train()
 
         self.print('training complete')
 
