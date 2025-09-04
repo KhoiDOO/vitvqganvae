@@ -27,7 +27,7 @@ def get_cifar10(root: str | None = None, download: bool = True) -> CIFAR10:
         download=download,
         transform=transforms.Compose([
             transforms.ToTensor(),
-            # transforms.RandomHorizontalFlip(),
+            transforms.RandomHorizontalFlip(),
             transforms.Normalize((0.5,0.5,0.5), (1.0,1.0,1.0))
         ])
     )

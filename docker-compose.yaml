@@ -2,8 +2,8 @@ services:
   vitvqganvae-train-cifar10:
     build:
       context: .
-      dockerfile: docker/cifar10.dockerfile
-    image: vitvqganvae:cifar10_v0.0.1
+      dockerfile: docker/cifar10_vqvae.dockerfile
+    image: vitvqganvae:cifar10_vqvae_v0.0.1
     shm_size: '16g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  # Mount local data directory
@@ -21,8 +21,27 @@ services:
   vitvqganvae-train-cifar10-dev:
     build:
       context: .
-      dockerfile: docker/cifar10_dev.dockerfile
-    image: vitvqganvae:cifar10_dev_v0.0.1
+      dockerfile: docker/dev/cifar10_vqvae_dev.dockerfile
+    image: vitvqganvae:cifar10_vqvae_dev_v0.0.1
+    shm_size: '16g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  # Mount local data directory
+      - ./outputs:/vitvqganvae/outputs  # Mount local result directory
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  
+  vitvqganvae-train-cifar10-rvq:
+    build:
+      context: .
+      dockerfile: docker/cifar10_vqvae_rvq.dockerfile
+    image: vitvqganvae:cifar10_vqvae_rvq_v0.0.1
     shm_size: '16g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  # Mount local data directory
@@ -40,8 +59,8 @@ services:
   vitvqganvae-train-celeba:
     build:
       context: .
-      dockerfile: docker/celeba.dockerfile
-    image: vitvqganvae:celeba_v0.0.1
+      dockerfile: docker/celeba_vqvae.dockerfile
+    image: vitvqganvae:celeba_vqvae_v0.0.1
     shm_size: '32g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  # Mount local data directory
