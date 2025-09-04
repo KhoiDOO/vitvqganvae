@@ -18,6 +18,4 @@ CMD wandb login ${WANDB_API_KEY} && accelerate launch \
     main.py \
     --config config/cifar10_vqvae_rvq.yaml \
     --train \
-    trainer_kwargs.use_wandb_tracking=True \
-    trainer_kwargs.checkpoint_every=null \
-    trainer_kwargs.save_results_every=null
+    trainer_kwargs.use_wandb_tracking=True
