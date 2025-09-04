@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dokh-celebavqvae-mg-4
+  name: dokh-celebavqvae-mg-4-no-cp-no-img
 spec:
   ttlSecondsAfterFinished: 60
   template:

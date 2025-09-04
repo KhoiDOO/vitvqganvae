@@ -181,6 +181,7 @@ class VQVAETrainer(Module):
             batch_size=self._batch_size,
             num_workers=self._num_workers,
             pin_memory=self._pin_memory,
+            # persistent_workers=self._num_workers > 0,
             shuffle=True,
             drop_last=True,
         )
@@ -190,6 +191,7 @@ class VQVAETrainer(Module):
             batch_size=self._batch_size,
             num_workers=self._num_workers,
             pin_memory=self._pin_memory,
+            # persistent_workers=self._num_workers > 0,
             shuffle=False,
             drop_last=True,
         )
@@ -318,7 +320,6 @@ class VQVAETrainer(Module):
         return forward_kwargs
     
     def forward(self):
-        device = self.device
         step = self.step.item()
         train_dl_iter: DataLoader = cycle(self.train_dataloader)
         val_dl_iter: DataLoader = cycle(self.val_dataloader)
