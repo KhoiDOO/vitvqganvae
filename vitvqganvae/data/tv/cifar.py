@@ -6,12 +6,22 @@ from torchvision.utils import make_grid
 
 import torch
 
+
 def make_grid_cifar(original: Tensor, reconstructed: Tensor, nrow: int | None = None) -> Tensor:
     imgs_and_recons = torch.stack((original, reconstructed), dim=0)
     imgs_and_recons = rearrange(imgs_and_recons, 'r b ... -> (b r) ...')
 
     imgs_and_recons = imgs_and_recons.detach().cpu().float()
     return make_grid(imgs_and_recons, nrow=nrow) + 0.5
+
+def denorm(x: Tensor) -> Tensor:
+    return x + 0.5
+
+def denorm_cifar10(x: Tensor) -> Tensor:
+    return denorm(x)
+
+def denorm_cifar100(x: Tensor) -> Tensor:
+    return denorm(x)
 
 def make_grid_cifar10(original: Tensor, reconstructed: Tensor, nrow: int | None = None) -> Tensor:
     return make_grid_cifar(original, reconstructed, nrow=nrow)

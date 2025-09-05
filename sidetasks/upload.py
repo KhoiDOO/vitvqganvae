@@ -6,6 +6,7 @@ from vitvqganvae.utils.config import load_config, parse_structured, config_to_pr
 
 import argparse
 import os
+import shutil
 
 
 if __name__ == "__main__":
@@ -31,10 +32,12 @@ if __name__ == "__main__":
 
     model_module.push_to_hub(
         repo_id=repo_id,
-        config={
-            'model': cfg.model,
-            'model_hf': args.model_class,
-            'model_config_cls': cfg.model_config,
-            'model_config': model_config
-        }
+        # config={
+        #     'model': cfg.model,
+        #     'model_hf': args.model_class,
+        #     'model_config_cls': cfg.model_config,
+        #     'model_config': model_config
+        # }
     )
+
+    shutil.rmtree(cfg.trial_dir, ignore_errors=True)

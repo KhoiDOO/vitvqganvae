@@ -1,0 +1,1 @@
+from .tv import CelebA, CIFAR10, CIFAR100
