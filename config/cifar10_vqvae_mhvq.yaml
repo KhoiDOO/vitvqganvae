@@ -1,11 +1,11 @@
-name: celeba_vqvae_rvq
+name: cifar10_vqvae_mhvq
 exp_root_dir: outputs
 exp_dir: ""
 trial_dir: ""
 n_gpus: 1
 seed: 42
 
-dataset_name: celeba
+dataset_name: cifar10
 dataset_source: torchvision
 dataset_img_key: null
 dataset_kwargs:
@@ -18,21 +18,21 @@ model_kwargs:
   dim: 128
   in_channel: 3
   out_channel: 3
-  layers: 2
+  layers: 1
   layer_mults: null
-  num_res_blocks: 1
-  group: 8
+  num_res_blocks: 0
+  group: 4
   conv_type: "conv2d"
   enc_act_func: "LeakyReLU"
   dec_act_func: "GLU"
   enc_act_kwargs: {"negative_slope": 0.1}
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 5
-  quantizer: "ResidualVQ"
+  quantizer: "VectorQuantize"
   codebook_size: 512
   quantizer_kwargs: {
     "codebook_dim": 64,
-    "num_quantizers" : 8,
+    "heads": 4,
     "decay" : 0.99,
     "commitment_weight": 0.25,
     "kmeans_init": True,
@@ -43,21 +43,21 @@ model_kwargs:
 trainer: VQVAETrainer
 trainer_config: VQVAETrainerConfig
 trainer_kwargs:
-  num_train_steps: 300000
+  num_train_steps: 15000
   batch_size: 128
   num_workers: 16
   pin_memory: True
   grad_accum_every: 1
-  learning_rate: 0.001
+  learning_rate: 1e-4
   weight_decay: 0.
-  max_grad_norm: 0.5
-  val_every: 1000
+  max_grad_norm: null
+  val_every: 500
   val_num_batches: 20
   val_num_images: 32
   scheduler: CosineAnnealingLR
   scheduler_kwargs:
     T_max: "${sub: ${trainer_kwargs.num_train_steps}, ${trainer_kwargs.warmup_steps}}"
-    eta_min: 0.0005
+    eta_min: 1e-5
   ema_kwargs: null
   accelerator_kwargs: {}
   optimizer_name: Adam
@@ -65,7 +65,7 @@ trainer_kwargs:
   loss_lambda:
     recon_loss: 1.
     quantizer_loss: 1.
-  checkpoint_every: 1000
+  checkpoint_every: 500
   save_results_every: null
   warmup_steps: 0
   use_wandb_tracking: False

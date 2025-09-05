@@ -62,7 +62,10 @@ def main(args, extras):
     model_config = config_to_primitive(model_config)
     model_cls = getattr(model, cfg.model)
     model_module = model_cls(**model_config)
-    summary(model_module, input_size=(5, 3, 64, 64))
+    try:
+        summary(model_module, input_size=(5, 3, 64, 64))
+    except Exception as e:
+        print(f"Cannot run model summary: {e}")
 
     # trainer
     trainer_config_cls = getattr(trainer, cfg.trainer_config)

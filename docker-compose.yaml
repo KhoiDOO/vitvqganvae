@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/cifar10_vqvae.dockerfile
-    image: vitvqganvae:cifar10_vqvae_v0.0.1
+    image: vitvqganvae:cifar10_vqvae
     shm_size: '16g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  # Mount local data directory
@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: docker/dev/cifar10_vqvae_dev.dockerfile
-    image: vitvqganvae:cifar10_vqvae_dev_v0.0.1
+    image: vitvqganvae:cifar10_vqvae_dev
     shm_size: '16g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  # Mount local data directory
@@ -41,7 +41,83 @@ services:
     build:
       context: .
       dockerfile: docker/cifar10_vqvae_rvq.dockerfile
-    image: vitvqganvae:cifar10_vqvae_rvq_v0.0.1
+    image: vitvqganvae:cifar10_vqvae_rvq
+    shm_size: '16g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  # Mount local data directory
+      - ./outputs:/vitvqganvae/outputs  # Mount local result directory
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  
+  vitvqganvae-train-cifar10-grvq:
+    build:
+      context: .
+      dockerfile: docker/cifar10_vqvae_grvq.dockerfile
+    image: vitvqganvae:cifar10_vqvae_grvq
+    shm_size: '16g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  # Mount local data directory
+      - ./outputs:/vitvqganvae/outputs  # Mount local result directory
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  
+  vitvqganvae-train-cifar10-mhvq:
+    build:
+      context: .
+      dockerfile: docker/cifar10_vqvae_mhvq.dockerfile
+    image: vitvqganvae:cifar10_vqvae_mhvq
+    shm_size: '16g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  # Mount local data directory
+      - ./outputs:/vitvqganvae/outputs  # Mount local result directory
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  
+  vitvqganvae-train-cifar10-rpq:
+    build:
+      context: .
+      dockerfile: docker/cifar10_vqvae_rpq.dockerfile
+    image: vitvqganvae:cifar10_vqvae_rpq
+    shm_size: '16g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  # Mount local data directory
+      - ./outputs:/vitvqganvae/outputs  # Mount local result directory
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+  
+  vitvqganvae-train-cifar10-svq:
+    build:
+      context: .
+      dockerfile: docker/cifar10_vqvae_svq.dockerfile
+    image: vitvqganvae:cifar10_vqvae_svq
     shm_size: '16g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  # Mount local data directory
@@ -60,7 +136,7 @@ services:
     build:
       context: .
       dockerfile: docker/celeba_vqvae.dockerfile
-    image: vitvqganvae:celeba_vqvae_v0.0.1
+    image: vitvqganvae:celeba_vqvae
     shm_size: '32g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  # Mount local data directory
@@ -79,7 +155,7 @@ services:
     build:
       context: .
       dockerfile: docker/celeba_vqvae_rvq.dockerfile
-    image: vitvqganvae:celeba_vqvae_rvq_v0.0.1
+    image: vitvqganvae:celeba_vqvae_rvq
     shm_size: '32g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  # Mount local data directory

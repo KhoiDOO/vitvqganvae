@@ -55,7 +55,7 @@ class VQVAETrainerConfig:
     val_num_images: int = 32,
     scheduler: str | None = None,
     scheduler_kwargs: dict = dict(),
-    ema_kwargs: dict = None,
+    ema_kwargs: dict | None = None,
     accelerator_kwargs: dict = dict(),
     optimizer_name: str = "Adam",
     optimizer_kwargs: dict = dict(),
@@ -91,7 +91,7 @@ class VQVAETrainer(Module):
         val_num_images: int = 32,
         scheduler: str | None = None,
         scheduler_kwargs: dict = dict(),
-        ema_kwargs: dict = None,
+        ema_kwargs: dict | None = None,
         accelerator_kwargs: dict = dict(),
         optimizer_name: str = "Adam",
         optimizer_kwargs: dict = dict(),
@@ -328,7 +328,8 @@ class VQVAETrainer(Module):
 
         self._model.train()
 
-        ema_model = self.ema_model.module if self.is_distributed else self.ema_model
+        if self.use_ema:
+            ema_model = self.ema_model.module if self.is_distributed else self.ema_model
 
         while step < self._num_train_steps:
 
