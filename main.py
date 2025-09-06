@@ -52,6 +52,14 @@ def main(args, extras):
         dataset_getter = getattr(tv, f"get_{cfg.dataset_name}")
         train_ds, valid_ds = dataset_getter(**cfg.dataset_kwargs)
         train_ds, valid_ds = TVDataset(train_ds, cfg.dataset_img_key), TVDataset(valid_ds, cfg.dataset_img_key)
+    elif cfg.dataset_source == "custom":
+        raise NotImplementedError("Custom dataset not yet implemented.")
+        from vitvqganvae.data import custom
+    else:
+        raise ValueError(f"Unknown dataset source: {cfg.dataset_source}")
+
+    dataset_config = config_to_primitive(cfg.dataset_kwargs)
+    img_size = dataset_config.get("image_size", 64)
 
     print(f'Number of training samples: {len(train_ds)}')
     print(f'Number of validation samples: {len(valid_ds)}')
@@ -63,7 +71,7 @@ def main(args, extras):
     model_cls = getattr(model, cfg.model)
     model_module = model_cls(**model_config)
     try:
-        summary(model_module, input_size=(5, 3, 64, 64))
+        summary(model_module, input_size=(1, 3, img_size, img_size))
     except Exception as e:
         print(f"Cannot run model summary: {e}")
 

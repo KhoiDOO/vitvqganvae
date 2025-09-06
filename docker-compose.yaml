@@ -169,6 +169,26 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+  
+  vitvqganvae-train-celeba128-rvq:
+    build:
+      context: .
+      dockerfile: docker/celeba128_vqvae_rvq.dockerfile
+    image: vitvqganvae:celeba128_vqvae_rvq
+    shm_size: '32g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  # Mount local data directory
+      - ./outputs:/vitvqganvae/outputs  # Mount local result directory
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
 networks:
   default:
     name: vitvqganvae_network
