@@ -325,6 +325,7 @@ class VQVAETrainer(Module):
         val_dl_iter: DataLoader = cycle(self.val_dataloader)
 
         best_loss = float('inf')
+        best_step = 0
 
         self._model.train()
 
@@ -395,12 +396,16 @@ class VQVAETrainer(Module):
                 for key in val_total_loss_dct:
                     val_total_loss_dct[key] /= num_val_batches
 
-                gathered_losses = self.accelerator.gather_for_metrics(val_total_loss_dct)
+                gathered_val_losses = self.accelerator.gather_for_metrics(val_total_loss_dct)
 
                 if self.is_main:
-                    final_val_losses = {f"val_{key}": value.mean().item() for key, value in gathered_losses.items()}
-                    self.log(**final_val_losses)
-                    self.print(f"Step {step}: Train Loss: {train_loss.item()} - Validation Loss: {final_val_losses}")
+                    val_losses = {f"val_{key}": value.mean().item() for key, value in gathered_val_losses.items()}
+                    self.log(**val_losses)
+                    self.print(f"Step {step}: Train Loss: {train_loss.item()} - Validation Loss: {val_losses}")
+
+                    if val_losses["val_recon_loss"] < best_loss:
+                        best_loss = val_losses["val_recon_loss"]
+                        best_step = step
 
                 self._model.train()
 
@@ -430,7 +435,7 @@ class VQVAETrainer(Module):
                         
                         model.train()
 
-        self.print('training complete')
+        self.print(f'Training Complete: best loss {best_loss} at step {best_step}')
 
     @property
     def model(self):
