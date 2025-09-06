@@ -107,7 +107,7 @@ env:
 We provide checkpoints and demo for using checkpoint via GoogleColab notebook. More checkpoints with different datasets can be found [here](https://huggingface.co/kohido).
 
 ### VQVAE Result on CelebA
-| 📚 <b>Dataset</b> | 📏 <b>Size</b> | 📉 <b>Reconstruction Loss</b> | 🧠 <b>Method</b> | 🏆 <b>Checkpoint</b> | 🚀 <b>Demo</b> |
+| 📚 <b>Dataset</b> | 📏 <b>Size</b> | 📉 <b>Loss</b> | 🧠 <b>Method</b> | 🏆 <b>Checkpoint</b> | 🚀 <b>Demo</b> |
 |:---:|:---:|:----------------------:|:------:|:-----------:|:----:|
 | CelebA | 64 x 64 | 0.00014 | 🟩 VQ| <a href="https://huggingface.co/kohido/celeba_vqvae">🤗 HuggingFace</a> | |
 | CelebA | 64 x 64 | 0.00024 | 🟩 RVQ| <a href="https://huggingface.co/kohido/celeba_vqvae_rvq">🤗 HuggingFace</a> | <a href="https://colab.research.google.com/drive/138j09tvXXMVN6sHfWwKlNo3Z8TAMg6hl?usp=sharing">📓 Colab</a> |
@@ -117,7 +117,7 @@ We provide checkpoints and demo for using checkpoint via GoogleColab notebook. M
 For data preparation, please refer to [DATA.md](docs/md/DATA.md)
 
 ### 🐍 Python Environment & Conda
-This project is built upon [Accelerate](https://github.com/huggingface/accelerate) to easily perform single, multi-gpus, and multi-nodes training. To train a Residual Vector Quantization (RVQ) VAE on CelebA dataset, you can use the following command
+This project is built upon [Accelerate](https://github.com/huggingface/accelerate) to easily perform single, multi-gpus, and multi-nodes training. To train a Residual Vector Quantization (RVQ) VAE on the CelebA dataset, you can use the following command
 
 ```bash
 accelerate launch \
@@ -140,7 +140,7 @@ In case, some non-related errors happens, after fixing that you might consider r
 ```bash
 docker compose up <service-name> --build --force-create
 ```
-To train a Residual Vector Quantization (RVQ) VAE on CelebA dataset, you can use the following command
+To train a Residual Vector Quantization (RVQ) VAE on the CelebA dataset, you can use the following command
 ```bash
 docker compose up vitvqganvae-train-celeba128-rvq --build --force-create
 ```
@@ -151,7 +151,7 @@ To train using Kubernetes, after setting up the environment, use the following c
 cd deploy
 kubectl apply -f <your_yaml_file>
 ```
-To train a Residual Vector Quantization (RVQ) VAE on CelebA dataset, you can use the following command
+To train a Residual Vector Quantization (RVQ) VAE on the CelebA dataset, you can use the following command
 ```bash
 cd deploy
 kubectl apply -f celeba_vqvae_rvq.yaml
