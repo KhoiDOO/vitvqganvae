@@ -1,4 +1,4 @@
-name: celeba128_vqvae_rvq
+name: celeba128_vqvae_grvq
 exp_root_dir: outputs
 exp_dir: ""
 trial_dir: ""
@@ -34,6 +34,7 @@ model_kwargs:
   quantizer_kwargs: {
     "codebook_dim": 128,
     "num_quantizers" : 8,
+    "groups": 2,
     "decay" : 0.99,
     "commitment_weight": 0.25,
     "kmeans_init": True,

@@ -1,4 +1,4 @@
-name: celeba128_vqvae_rvq
+name: celeba128_vqvae_mhvq
 exp_root_dir: outputs
 exp_dir: ""
 trial_dir: ""
@@ -29,12 +29,12 @@ model_kwargs:
   enc_act_kwargs: {"negative_slope": 0.1}
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 5
-  quantizer: "ResidualVQ"
+  quantizer: "VectorQuantize"
   codebook_size: 512
   quantizer_kwargs: {
     "codebook_dim": 128,
-    "num_quantizers" : 8,
     "decay" : 0.99,
+    "heads": 8,
     "commitment_weight": 0.25,
     "kmeans_init": True,
     "use_cosine_sim": True
