@@ -30,9 +30,9 @@ model_kwargs:
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 5
   quantizer: "ResidualVQ"
-  codebook_size: 512
+  codebook_size: 1024
   quantizer_kwargs: {
-    "codebook_dim": 64,
+    "codebook_dim": 128,
     "num_quantizers" : 8,
     "decay" : 0.99,
     "commitment_weight": 0.25,
