@@ -82,7 +82,7 @@ This project uses [wandb](https://github.com/wandb/wandb) for logging metrics. Y
 For Docker user, you will need to create a file ```.env```, so that the ```docker-compose``` will read the ```wandb``` token from that file to login ```wandb``` inside the container. A template for ```.env``` is as follows:
 
 ```
-WANDB_PROJECT_NAME=**<your_project_name>**
+WANDB_PROJECT_NAME=<your_project_name>
 WANDB_ENTITY=<your_project_entity>
 WANDB_API_KEY=<your_wandb_api_key>
 ```
@@ -157,7 +157,12 @@ cd deploy
 kubectl apply -f celeba_vqvae_rvq.yaml
 ```
 
-## Testing
+## 🧪 Testing
+
+To perform testing all core functions of ```vitvqganvae```, please refer to folder ```test```, which contains ```*.py``` test files. To easily test them all, perform the following command:
+```bash
+bash test.sh
+```
 
 ## 🙏 Acknowledgement
 - [vector-quantize-pytorch](https://github.com/lucidrains/vector-quantize-pytorch)
