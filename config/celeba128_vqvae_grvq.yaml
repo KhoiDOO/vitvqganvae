@@ -29,7 +29,7 @@ model_kwargs:
   enc_act_kwargs: {"negative_slope": 0.1}
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 5
-  quantizer: "ResidualVQ"
+  quantizer: "GroupedResidualVQ"
   codebook_size: 512
   quantizer_kwargs: {
     "codebook_dim": 128,

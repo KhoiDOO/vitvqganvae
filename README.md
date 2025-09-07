@@ -109,9 +109,9 @@ We provide checkpoints and demo for using checkpoint via GoogleColab notebook. M
 ### VQVAE Result on CelebA
 | 📚 <b>Dataset</b> | 📏 <b>Size</b> | 📉 <b>Loss</b> | 🧠 <b>Method</b> | 🏆 <b>Checkpoint</b> | 🚀 <b>Demo</b> |
 |:---:|:---:|:----------------------:|:------:|:-----------:|:----:|
-| CelebA | 64 x 64 | 0.00014 | 🟩 VQ| <a href="https://huggingface.co/kohido/celeba_vqvae">🤗 HuggingFace</a> | |
-| CelebA | 64 x 64 | 0.00024 | 🟩 RVQ| <a href="https://huggingface.co/kohido/celeba_vqvae_rvq">🤗 HuggingFace</a> | <a href="https://colab.research.google.com/drive/138j09tvXXMVN6sHfWwKlNo3Z8TAMg6hl?usp=sharing">📓 Colab</a> |
-| CelebA | 64 x 64 | 0.00009 | 🟩 GRVQ| <a href="https://huggingface.co/kohido/celeba_vqvae_grvq">🤗 HuggingFace</a> | <a href="https://colab.research.google.com/drive/1InSAa_8FBvw5VLKhuo_yVBIkiGKpjJxc?usp=sharing">📓 Colab |
+| CelebA | 64 x 64 | 0.00014 | 🟩 VQ| <a href="https://huggingface.co/kohido/celeba_vqvae">🤗 HF</a> | |
+| CelebA | 64 x 64 | 0.00024 | 🟩 RVQ| <a href="https://huggingface.co/kohido/celeba_vqvae_rvq">🤗 HF</a> | <a href="https://colab.research.google.com/drive/138j09tvXXMVN6sHfWwKlNo3Z8TAMg6hl?usp=sharing">📓 Colab</a> |
+| CelebA | 64 x 64 | 0.00009 | 🟩 GRVQ| <a href="https://huggingface.co/kohido/celeba_vqvae_grvq">🤗 HF</a> | <a href="https://colab.research.google.com/drive/1InSAa_8FBvw5VLKhuo_yVBIkiGKpjJxc?usp=sharing">📓 Colab |
 
 ## 🏋️‍♂️ Train
 For data preparation, please refer to [DATA.md](docs/md/DATA.md)
