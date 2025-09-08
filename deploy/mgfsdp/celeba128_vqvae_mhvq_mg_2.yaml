@@ -70,6 +70,7 @@ spec:
               --config config/celeba128_vqvae_mhvq.yaml \
               --gpu "0,1" \
               --train \
+              dataset_kwargs.root=/mnt/data/celeba \
               trainer_kwargs.use_wandb_tracking=True
 
         volumeMounts:
