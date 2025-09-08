@@ -115,7 +115,7 @@ We provide checkpoints and demo for using checkpoint via GoogleColab notebook. M
 | CelebA | 64 x 64 | $$7\times 10^{-5}$$ | 🟩 GRVQ| <a href="https://huggingface.co/kohido/celeba_vqvae_mhvq">🤗 HF</a> | |
 | CelebA | 128 x 128 | $$6\times 10^{-4}$$ | 🟩 RVQ| <a href="https://huggingface.co/kohido/celeba128_vqvae_rvq">🤗 HF</a> | |
 | CelebA | 128 x 128 | $$4\times 10^{-4}$$ | 🟩 GRVQ| <a href="https://huggingface.co/kohido/celeba128_vqvae_grvq">🤗 HF</a> | <a href="https://colab.research.google.com/drive/11RbDpioFj3MAFYy2O-P5d_J7H40uhPjS?usp=sharing">📓 Colab |
-| CelebA | 128 x 128 | $$3.9\times 10^{-4}$$ | 🟩 MHVQ| <a href="https://huggingface.co/kohido/celeba128_vqvae_mhvq">🤗 HF</a> | <a href="https://colab.research.google.com/drive/1PiFA0dFvcsVUwRh9x2VLhBecj2oYL3eP?usp=sharing">📓 Colab |
+| CelebA | 128 x 128 | $$2.4\times 10^{-4}$$ | 🟩 MHVQ| <a href="https://huggingface.co/kohido/celeba128_vqvae_mhvq">🤗 HF</a> | <a href="https://colab.research.google.com/drive/1PiFA0dFvcsVUwRh9x2VLhBecj2oYL3eP?usp=sharing">📓 Colab |
 
 ## 🏋️‍♂️ Train
 For data preparation, please refer to [DATA.md](docs/md/DATA.md)

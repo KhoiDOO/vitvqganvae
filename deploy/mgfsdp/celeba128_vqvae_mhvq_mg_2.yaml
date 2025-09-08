@@ -53,19 +53,7 @@ spec:
             fi
             wandb login ${WANDB_API_KEY}
             accelerate launch \
-              --mixed_precision=no \
-              --num_processes=2 \
-              --num_machines=1 \
-              --dynamo_backend=no \
-              --use_fsdp \
-              --fsdp_sharding_strategy=1 \
-              --fsdp_offload_params=false \
-              --fsdp_auto_wrap_policy=2 \
-              --fsdp_min_num_params=1e8 \
-              --fsdp_backward_prefetch_policy=1 \
-              --fsdp_state_dict_type=1 \
-              --fsdp_cpu_ram_efficient_loading=false \
-              --fsdp_sync_module_states=true \
+              --config_file acc_config/fsdp/mg_2_non_former.yaml \
               main.py \
               --config config/celeba128_vqvae_mhvq.yaml \
               --gpu "0,1" \
