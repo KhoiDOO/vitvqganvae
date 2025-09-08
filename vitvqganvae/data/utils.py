@@ -76,6 +76,10 @@ class CustomSubset(Subset):
         if hasattr(self.dataset, name):
             return getattr(self.dataset, name)
         return super().__getattr__(name)
+    
+    @property
+    def __class__(self):
+        return self.dataset.__class__
 
 
 def random_split(

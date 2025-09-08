@@ -207,6 +207,25 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+  
+  vitvqganvae-train-ffhq-mhvq:
+    build:
+      context: .
+      dockerfile: docker/ffhq256_vqvae_mhvq.dockerfile
+    image: vitvqganvae:ffhq256_vqvae_mhvq
+    shm_size: '32g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  
+      - ./outputs:/vitvqganvae/outputs  
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 networks:
   default:

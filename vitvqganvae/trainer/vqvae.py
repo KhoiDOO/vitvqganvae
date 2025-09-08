@@ -11,29 +11,29 @@ from contextlib import nullcontext
 from dataclasses import dataclass, field
 
 from torch.nn import Module
+
 from torch.utils.data import Dataset, DataLoader
-from torch.optim import Optimizer, lr_scheduler
-from torch.optim.lr_scheduler import _LRScheduler
 from torchvision.datasets import VisionDataset
 from ..data.utils import ConcatDataset
+from vitvqganvae import data
+
+from torch.optim import Optimizer, lr_scheduler
+from torch.optim.lr_scheduler import _LRScheduler
 from .utils import OptimizerWithWarmupSchedule
 
-from torchvision.utils import make_grid, save_image
-
+from torchvision.utils import save_image
 from pytorch_custom_utils import add_wandb_tracker_contextmanager
-from einops import rearrange
 
 from accelerate import Accelerator
 from accelerate.utils import DistributedType, DistributedDataParallelKwargs
 
 from beartype import beartype
-from beartype.door import is_bearable
-from beartype.typing import Optional, Tuple, Type, List
+from beartype.typing import Optional
 
 from ema_pytorch import EMA
 
 from . import opt
-from ..utils.helpers import exists, default, cycle, divisible_by, accum_log
+from ..utils.helpers import cycle, divisible_by, accum_log
 
 
 DEFAULT_DDP_KWARGS = DistributedDataParallelKwargs(
@@ -165,7 +165,7 @@ class VQVAETrainer(Module):
             **self._optimizer_kwargs
         )
 
-        scheduler = getattr(lr_scheduler, self._scheduler) if self._scheduler else None
+        scheduler: _LRScheduler = getattr(lr_scheduler, self._scheduler) if self._scheduler else None
 
         self.optimizer = OptimizerWithWarmupSchedule(
             accelerator=self.accelerator,
@@ -181,7 +181,6 @@ class VQVAETrainer(Module):
             batch_size=self._batch_size,
             num_workers=self._num_workers,
             pin_memory=self._pin_memory,
-            # persistent_workers=self._num_workers > 0,
             shuffle=True,
             drop_last=True,
         )
@@ -191,16 +190,18 @@ class VQVAETrainer(Module):
             batch_size=self._batch_size,
             num_workers=self._num_workers,
             pin_memory=self._pin_memory,
-            # persistent_workers=self._num_workers > 0,
             shuffle=False,
             drop_last=True,
         )
 
         self.custom_make_grid = None
-        if isinstance(self._train_dataset.dataset, VisionDataset) or isinstance(self._train_dataset.dataset, ConcatDataset):
-            print(f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}")
-            from ..data import tv
-            self.custom_make_grid = getattr(tv, f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}", None)
+        # if isinstance(self._train_dataset.dataset, VisionDataset) or isinstance(self._train_dataset.dataset, ConcatDataset):
+        #     print(f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}")
+        #     from ..data import tv
+        #     self.custom_make_grid = getattr(tv, f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}", None)
+        dataset_name = self.train_dataset.__class__.__name__.lower()
+        print(dataset_name)
+        self.custom_make_grid = getattr(data, f"make_grid_{dataset_name}", None)
         
         if self.custom_make_grid is None:
             raise NotImplementedError("Custom make_grid function not found.")

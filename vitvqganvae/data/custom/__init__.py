@@ -1,1 +1,2 @@
-from .imagenet import ImageNet, get_imagenet
+from .imagenet import *
+from .ffhq import *

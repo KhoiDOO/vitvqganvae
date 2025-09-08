@@ -25,6 +25,7 @@ def denorm_imagenet(x: Tensor) -> Tensor:
 
 class ImageNet(Dataset):
     def __init__(self, root: str, split: str = 'train', transform: transforms.Compose | None = None):
+        super().__init__()
         self._root = root
         self._split = split
         self._transform = transform

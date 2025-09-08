@@ -53,8 +53,9 @@ def main(args, extras):
         train_ds, valid_ds = dataset_getter(**cfg.dataset_kwargs)
         train_ds, valid_ds = TVDataset(train_ds, cfg.dataset_img_key), TVDataset(valid_ds, cfg.dataset_img_key)
     elif cfg.dataset_source == "custom":
-        raise NotImplementedError("Custom dataset not yet implemented.")
         from vitvqganvae.data import custom
+        dataset_getter = getattr(custom, f"get_{cfg.dataset_name}")
+        train_ds, valid_ds = dataset_getter(**cfg.dataset_kwargs)
     else:
         raise ValueError(f"Unknown dataset source: {cfg.dataset_source}")
 

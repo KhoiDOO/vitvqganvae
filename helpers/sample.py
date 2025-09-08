@@ -24,6 +24,12 @@ if __name__ == "__main__":
         from vitvqganvae.data.tv.celeba import denorm_celeba as denorm
 
         train_ds, test_ds = get_celeba(root=args.root, image_size=128)
+    
+    elif args.dataset == "ffhq":
+        from vitvqganvae.data.custom.ffhq import get_ffhq
+        from vitvqganvae.data.custom.ffhq import denorm_ffhq as denorm
+
+        train_ds, test_ds = get_ffhq(root=args.root, image_size=128)
 
     print(f"Train dataset size: {len(train_ds)}")
     print(f"Test dataset size: {len(test_ds)}")
