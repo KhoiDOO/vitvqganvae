@@ -1,6 +1,7 @@
 import os
 import argparse
 import torch
+import shutil
 
 from vitvqganvae.utils.config import (
     ExperimentConfig, 
@@ -49,6 +50,8 @@ def main(args, extras):
         img = img.permute(1, 2, 0).cpu().numpy()
         img = Image.fromarray(img)
         img.save(os.path.join(save_dir, f"valid_{idx}.png"))
+
+    shutil.rmtree(args.trial_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

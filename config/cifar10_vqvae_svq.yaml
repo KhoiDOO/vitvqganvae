@@ -31,7 +31,7 @@ model_kwargs:
   quantizer: "SimVQ"
   codebook_size: 512
   quantizer_kwargs: {
-    "commitment_weight": 1.0,
+    "commitment_weight": 0.25,
     "rotation_trick": True,
   }
   l2_recon_loss: True

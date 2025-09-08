@@ -15,12 +15,12 @@ dataset_kwargs:
 model: VQVAE
 model_config: VQVAEConfig
 model_kwargs:
-  dim: 64
+  dim: 128
   in_channel: 3
   out_channel: 3
   layers: 1
   layer_mults: null
-  num_res_blocks: 1
+  num_res_blocks: 0
   group: 4
   conv_type: "conv2d"
   enc_act_func: "LeakyReLU"
@@ -29,10 +29,13 @@ model_kwargs:
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 5
   quantizer: "LFQ"
-  codebook_size: 1024
+  codebook_size: 4096
   quantizer_kwargs: {
-      "diversity_gamma": 4.,
-      "entropy_loss_weight": 0.1
+    "entropy_loss_weight": 0.02,
+    "diversity_gamma": 1.0,
+    "num_codebooks": 8,
+    "experimental_softplus_entropy_loss": True,
+    "spherical": True,
   }
   l2_recon_loss: True
 
@@ -40,11 +43,11 @@ trainer: VQVAETrainer
 trainer_config: VQVAETrainerConfig
 trainer_kwargs:
   num_train_steps: 15000
-  batch_size: 512
+  batch_size: 128
   num_workers: 16
   pin_memory: True
   grad_accum_every: 1
-  learning_rate: 1e-2
+  learning_rate: 1e-4
   weight_decay: 0.
   max_grad_norm: null
   val_every: 500
@@ -53,7 +56,7 @@ trainer_kwargs:
   scheduler: CosineAnnealingLR
   scheduler_kwargs:
     T_max: "${sub: ${trainer_kwargs.num_train_steps}, ${trainer_kwargs.warmup_steps}}"
-    eta_min: 5e-05
+    eta_min: 1e-5
   ema_kwargs: null
   accelerator_kwargs: {}
   optimizer_name: Adam

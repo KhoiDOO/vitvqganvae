@@ -18,6 +18,12 @@ if __name__ == "__main__":
         from vitvqganvae.data.custom.imagenet import denorm_imagenet as denorm
 
         train_ds, test_ds = get_imagenet(root=args.root, image_size=128)
+    
+    elif args.dataset == "celeba":
+        from vitvqganvae.data.tv.celeba import get_celeba
+        from vitvqganvae.data.tv.celeba import denorm_celeba as denorm
+
+        train_ds, test_ds = get_celeba(root=args.root, image_size=128)
 
     print(f"Train dataset size: {len(train_ds)}")
     print(f"Test dataset size: {len(test_ds)}")
