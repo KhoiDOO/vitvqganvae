@@ -1,6 +1,6 @@
 [project]
 name = "vitvqganvae"
-version = "0.2.9"
+version = "0.3.0"
 authors = [
   { name="KhoiDOO", email="khoido8899@gmail.com" },
 ]
@@ -21,7 +21,8 @@ dependencies = [
   "ema_pytorch==0.7.7",
   "pytorch_warmup==0.2.0",
   "torchinfo==1.8.0",
-  "omegaconf==2.3.0"
+  "omegaconf==2.3.0",
+  "datasets==4.0.0"
 ]
 
 [tool.setuptools.packages.find]

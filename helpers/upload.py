@@ -30,14 +30,11 @@ if __name__ == "__main__":
 
     repo_id = cfg.name if args.repo is None else args.repo
 
-    model_module.push_to_hub(
-        repo_id=repo_id,
-        # config={
-        #     'model': cfg.model,
-        #     'model_hf': args.model_class,
-        #     'model_config_cls': cfg.model_config,
-        #     'model_config': model_config
-        # }
-    )
+    try:
+        model_module.push_to_hub(
+            repo_id=repo_id,
+        )
+    except Exception as e:
+        print(f"Failed to push model to Hugging Face: {e}")
 
     shutil.rmtree(cfg.trial_dir, ignore_errors=True)

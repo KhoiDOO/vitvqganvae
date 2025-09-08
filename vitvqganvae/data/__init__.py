@@ -7,3 +7,6 @@ from .custom import ImageNet, FFHQ
 from .custom import make_grid_imagenet, make_grid_ffhq
 from .custom import denorm_imagenet, denorm_ffhq
 from .custom import get_imagenet, get_ffhq
+
+from .hf import Ellipsoid1024
+from .hf import get_ellipsoid1024

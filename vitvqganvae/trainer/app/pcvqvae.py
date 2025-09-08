@@ -13,7 +13,7 @@ from vitvqganvae import data
 
 from torch.optim import Optimizer, lr_scheduler
 from torch.optim.lr_scheduler import _LRScheduler
-from .utils import OptimizerWithWarmupSchedule
+from ..utils import OptimizerWithWarmupSchedule
 
 from torchvision.utils import save_image
 from pytorch_custom_utils import add_wandb_tracker_contextmanager
@@ -26,8 +26,8 @@ from beartype.typing import Optional
 
 from ema_pytorch import EMA
 
-from . import opt
-from ..utils.helpers import cycle, divisible_by, accum_log
+from .. import opt
+from ...utils.helpers import cycle, divisible_by, accum_log
 
 
 DEFAULT_DDP_KWARGS = DistributedDataParallelKwargs(
@@ -35,7 +35,7 @@ DEFAULT_DDP_KWARGS = DistributedDataParallelKwargs(
 )
 
 @dataclass
-class VQVAETrainerConfig:
+class PCVQVAETrainerConfig:
     num_train_steps: int = 10000,
     batch_size: int = 32,
     num_workers: int = 4,
@@ -55,7 +55,6 @@ class VQVAETrainerConfig:
     optimizer_kwargs: dict = dict(),
     loss_lambda: dict = dict(),
     checkpoint_every: int | None = None,
-    save_results_every: int | None = None,
     warmup_steps: int = 1000,
     use_wandb_tracking: bool = False,
     resume: bool = False,
@@ -65,7 +64,7 @@ class VQVAETrainerConfig:
 
 @beartype
 @add_wandb_tracker_contextmanager()
-class VQVAETrainer(Module):
+class PCVQVAETrainer(Module):
     def __init__(
         self,
         model: Module,
@@ -91,7 +90,6 @@ class VQVAETrainer(Module):
         optimizer_kwargs: dict = dict(),
         loss_lambda: dict = dict(),
         checkpoint_every: int | None = None,
-        save_results_every: int | None = None,
         warmup_steps: int = 1000,
         use_wandb_tracking: bool = False,
         resume: bool = False,
@@ -123,7 +121,6 @@ class VQVAETrainer(Module):
         self._optimizer_kwargs = optimizer_kwargs
         self._loss_lambda = loss_lambda
         self._checkpoint_every = checkpoint_every
-        self._save_results_every = save_results_every
         self._warmup_steps = warmup_steps
         self._use_wandb_tracking = use_wandb_tracking
         self._resume = resume
@@ -187,15 +184,6 @@ class VQVAETrainer(Module):
             shuffle=False,
             drop_last=True,
         )
-
-        self.custom_make_grid = None
-        dataset_name = self.train_dataset.__class__.__name__.lower()
-        print(dataset_name)
-        self.custom_make_grid = getattr(data, f"make_grid_{dataset_name}", None)
-        
-        if self.custom_make_grid is None:
-            raise NotImplementedError("Custom make_grid function not found.")
-        print(f"Custom make_grid function: {self.custom_make_grid.__name__ if self.custom_make_grid else None}")
         
         (
             self._model,
@@ -405,26 +393,6 @@ class VQVAETrainer(Module):
                     self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_{step}.pt'))
                     if self.use_ema:
                         self.save_ema(os.path.join(self.checkpoint_folder, f'model_ckpt_ema_{step}.pt'))
-
-            if self._save_results_every:
-                if self.is_main and divisible_by(step, self._save_results_every):
-                    models_to_evaluate = ((self.unwrapped_model, str(step)),)
-                    if self.use_ema:
-                        models_to_evaluate += ((self.unwrapped_ema_model, f"{step}_ema"),)
-
-                    for model, filename in models_to_evaluate:
-                        model.eval()
-
-                        val_data = next(val_dl_iter)
-                        val_data = val_data[:self._val_num_images].to(self.device)
-
-                        _, recons = model(val_data, return_loss = True, return_recons = True)
-
-                        grid = self.custom_make_grid(val_data, recons, nrow=2)
-
-                        save_image(grid, os.path.join(self.generation_folder, f'{filename}.png'))
-                        
-                        model.train()
 
         self.print(f'Training Complete: best loss {best_loss} at step {best_step}')
 

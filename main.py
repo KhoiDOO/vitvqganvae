@@ -1,7 +1,6 @@
 import os
 import argparse
-
-from omegaconf import OmegaConf
+from torch import Tensor
 
 from vitvqganvae.utils.config import (
     ExperimentConfig, 
@@ -10,7 +9,7 @@ from vitvqganvae.utils.config import (
     config_to_primitive,
     dump_config
 )
-from vitvqganvae import model, trainer, data
+from vitvqganvae import model, trainer
 from vitvqganvae.trainer.utils import trackers
 
 from torchinfo import summary
@@ -56,11 +55,12 @@ def main(args, extras):
         from vitvqganvae.data import custom
         dataset_getter = getattr(custom, f"get_{cfg.dataset_name}")
         train_ds, valid_ds = dataset_getter(**cfg.dataset_kwargs)
+    elif cfg.dataset_source == "hf":
+        from vitvqganvae.data import hf
+        dataset_getter = getattr(hf, f"get_{cfg.dataset_name}")
+        train_ds, valid_ds = dataset_getter(**cfg.dataset_kwargs)
     else:
         raise ValueError(f"Unknown dataset source: {cfg.dataset_source}")
-
-    dataset_config = config_to_primitive(cfg.dataset_kwargs)
-    img_size = dataset_config.get("image_size", 64)
 
     print(f'Number of training samples: {len(train_ds)}')
     print(f'Number of validation samples: {len(valid_ds)}')
@@ -72,7 +72,8 @@ def main(args, extras):
     model_cls = getattr(model, cfg.model)
     model_module = model_cls(**model_config)
     try:
-        summary(model_module, input_size=(1, 3, img_size, img_size))
+        sample: Tensor = train_ds[0].unsqueeze(0)
+        summary(model_module, input_size=sample.shape)
     except Exception as e:
         print(f"Cannot run model summary: {e}")
 

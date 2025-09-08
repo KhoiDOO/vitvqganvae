@@ -10,6 +10,7 @@ class VQVAEPipeline(
     VQVAE, 
     PyTorchModelHubMixin,
     repo_url="https://github.com/KhoiDOO/vitvqganvae",
+    docs_url="https://github.com/KhoiDOO/vitvqganvae",
     pipeline_tag="image-to-image",
     license="mit",
 ):
