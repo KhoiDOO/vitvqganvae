@@ -165,7 +165,12 @@ class VQVAETrainer(Module):
             **self._optimizer_kwargs
         )
 
+        print(f"Optimizer: {self._optimizer_name} - {optimizer} - type: {type(optimizer)}")
+
         scheduler: _LRScheduler = getattr(lr_scheduler, self._scheduler) if self._scheduler else None
+
+        print(f"Scheduler: {self._scheduler} - {scheduler} - type: {type(scheduler)}")
+        exit(0)
 
         self.optimizer = OptimizerWithWarmupSchedule(
             accelerator=self.accelerator,
