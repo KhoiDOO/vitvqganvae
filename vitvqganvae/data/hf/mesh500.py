@@ -34,10 +34,27 @@ class Mesh500(Dataset):
             radian = np.pi / 180 * random.uniform(0, 360)
             rotation = Rotation.from_rotvec(radian * np.array(axis))
             points = rotation.apply(points)
+        # scale to a [-0.5, 0.5] cube
+        points = points - np.mean(points, axis=0, keepdims=True)
+        max_abs = np.max(np.abs(points))
+        points = points / (2 * max_abs)
+
         points: Tensor = torch.from_numpy(points) 
         points = points.float()
         points = points.permute(1, 0)
         return points
+
+    @property
+    def root(self) -> str:
+        return self._root
+
+    @property
+    def augment(self) -> bool:
+        return self._augment
+
+    @augment.setter
+    def augment(self, value: bool) -> None:
+        self._augment = value
 
 
 def get_mesh500(root: str | None = None, num_points: int = 1024, split: float = 0.8, augment: bool = True) -> tuple[Mesh500, Mesh500]:
@@ -47,6 +64,8 @@ def get_mesh500(root: str | None = None, num_points: int = 1024, split: float = 
     train_len = int(len(dataset) * split)
     split = [train_len, len(dataset) - train_len]
     train_ds, valid_ds = random_split(dataset, split)
+    valid_ds: Mesh500
+    valid_ds.augment = False
     return train_ds, valid_ds
 
 def get_mesh500_1024(root: str | None = None, split: float = 0.8, augment: bool = True) -> tuple[Mesh500, Mesh500]:
