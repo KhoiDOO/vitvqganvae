@@ -28,7 +28,7 @@ model_kwargs:
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 10
   quantizer: "VectorQuantize"
-  codebook_size: 256
+  codebook_size: 512
   quantizer_kwargs: {
     "codebook_dim": 64,
     "heads": 8,

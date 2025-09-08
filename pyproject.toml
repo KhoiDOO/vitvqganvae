@@ -1,6 +1,6 @@
 [project]
 name = "vitvqganvae"
-version = "0.3.0"
+version = "0.3.1"
 authors = [
   { name="KhoiDOO", email="khoido8899@gmail.com" },
 ]
@@ -22,7 +22,9 @@ dependencies = [
   "pytorch_warmup==0.2.0",
   "torchinfo==1.8.0",
   "omegaconf==2.3.0",
-  "datasets==4.0.0"
+  "datasets==4.0.0",
+  "wandb==0.21.1",
+  "scikit-learn==1.7.1"
 ]
 
 [tool.setuptools.packages.find]
