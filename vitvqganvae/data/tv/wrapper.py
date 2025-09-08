@@ -26,3 +26,7 @@ class TVDataset(Dataset):
     @property
     def key(self):
         return self._key
+    
+    @property
+    def __class__(self):
+        return self._dataset.__class__
