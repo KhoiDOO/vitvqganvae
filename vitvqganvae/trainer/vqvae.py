@@ -165,12 +165,7 @@ class VQVAETrainer(Module):
             **self._optimizer_kwargs
         )
 
-        print(f"Optimizer: {self._optimizer_name} - {optimizer} - type: {type(optimizer)}")
-
         scheduler: _LRScheduler = getattr(lr_scheduler, self._scheduler) if self._scheduler else None
-
-        print(f"Scheduler: {self._scheduler} - {scheduler} - type: {type(scheduler)}")
-        exit(0)
 
         self.optimizer = OptimizerWithWarmupSchedule(
             accelerator=self.accelerator,
@@ -200,10 +195,6 @@ class VQVAETrainer(Module):
         )
 
         self.custom_make_grid = None
-        # if isinstance(self._train_dataset.dataset, VisionDataset) or isinstance(self._train_dataset.dataset, ConcatDataset):
-        #     print(f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}")
-        #     from ..data import tv
-        #     self.custom_make_grid = getattr(tv, f"make_grid_{self._train_dataset.dataset.__class__.__name__.lower()}", None)
         dataset_name = self.train_dataset.__class__.__name__.lower()
         print(dataset_name)
         self.custom_make_grid = getattr(data, f"make_grid_{dataset_name}", None)
