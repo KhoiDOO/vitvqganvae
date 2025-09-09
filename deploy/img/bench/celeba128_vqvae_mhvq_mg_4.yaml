@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dokh-bench-celebavqvae-mhvq-mg-2
+  name: dokh-bench-celebavqvae-mhvq-mg-4
 spec:
   ttlSecondsAfterFinished: 60
   template:
@@ -65,5 +65,5 @@ spec:
         - {name: data, mountPath: /mnt/data}
         - {name: dshm, mountPath: /dev/shm}
         resources:
-          limits:   { nvidia.com/gpu: 2, cpu: "24",  memory: "64Gi" }
-          requests: { nvidia.com/gpu: 2, cpu: "16",  memory: "64Gi" }
+          limits:   { nvidia.com/gpu: 4, cpu: "24",  memory: "64Gi" }
+          requests: { nvidia.com/gpu: 4, cpu: "16",  memory: "64Gi" }
