@@ -58,6 +58,7 @@ def get_ffhq(root: str | None = None, image_size: int = 64, split: list[int] = [
 
     transform = transforms.Compose([
         transforms.Resize((image_size, image_size)),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
