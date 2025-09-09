@@ -10,8 +10,12 @@
 <h1 align="center">VitVqGanVae <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f916.svg" width="32"/> <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4a1.svg" width="32"/></h1>
 
 <p align="center">
-<b>Benchmark for Evaluating Data Reconstruction using Vector Quantization</b>
+<b>A flexible and extensible framework for benchmarking data reconstruction using various Vector Quantization techniques with VAEs and GANs.</b>
 </p>
+
+## 📖 Overview
+
+This project provides a comprehensive benchmark for evaluating the performance of different Vector Quantization (VQ) methods within a VAE/GAN framework. It is designed to be modular and easily extensible, allowing researchers and developers to experiment with novel VQ techniques, models, and datasets.
 
 
 ## 🚀 Setup
