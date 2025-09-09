@@ -2,7 +2,7 @@ services:
   vitvqganvae-train-cifar10:
     build:
       context: .
-      dockerfile: docker/cifar10_vqvae.dockerfile
+      dockerfile: docker/img/cifar10/cifar10_vqvae.dockerfile
     image: vitvqganvae:cifar10_vqvae
     shm_size: '16g'
     volumes:
@@ -21,7 +21,7 @@ services:
   vitvqganvae-train-cifar10-rvq:
     build:
       context: .
-      dockerfile: docker/cifar10_vqvae_rvq.dockerfile
+      dockerfile: docker/img/cifar10/cifar10_vqvae_rvq.dockerfile
     image: vitvqganvae:cifar10_vqvae_rvq
     shm_size: '16g'
     volumes:
@@ -40,7 +40,7 @@ services:
   vitvqganvae-train-cifar10-grvq:
     build:
       context: .
-      dockerfile: docker/cifar10_vqvae_grvq.dockerfile
+      dockerfile: docker/img/cifar10/cifar10_vqvae_grvq.dockerfile
     image: vitvqganvae:cifar10_vqvae_grvq
     shm_size: '16g'
     volumes:
@@ -59,7 +59,7 @@ services:
   vitvqganvae-train-cifar10-mhvq:
     build:
       context: .
-      dockerfile: docker/cifar10_vqvae_mhvq.dockerfile
+      dockerfile: docker/img/cifar10/cifar10_vqvae_mhvq.dockerfile
     image: vitvqganvae:cifar10_vqvae_mhvq
     shm_size: '16g'
     volumes:
@@ -78,7 +78,7 @@ services:
   vitvqganvae-train-cifar10-rpq:
     build:
       context: .
-      dockerfile: docker/cifar10_vqvae_rpq.dockerfile
+      dockerfile: docker/img/cifar10/cifar10_vqvae_rpq.dockerfile
     image: vitvqganvae:cifar10_vqvae_rpq
     shm_size: '16g'
     volumes:
@@ -97,7 +97,7 @@ services:
   vitvqganvae-train-cifar10-svq:
     build:
       context: .
-      dockerfile: docker/cifar10_vqvae_svq.dockerfile
+      dockerfile: docker/img/cifar10/cifar10_vqvae_svq.dockerfile
     image: vitvqganvae:cifar10_vqvae_svq
     shm_size: '16g'
     volumes:
@@ -116,7 +116,7 @@ services:
   vitvqganvae-train-cifar10-lfq:
     build:
       context: .
-      dockerfile: docker/cifar10_vqvae_lfq.dockerfile
+      dockerfile: docker/img/cifar10/cifar10_vqvae_lfq.dockerfile
     image: vitvqganvae:cifar10_vqvae_lfq
     shm_size: '16g'
     volumes:
@@ -135,7 +135,7 @@ services:
   vitvqganvae-train-celeba:
     build:
       context: .
-      dockerfile: docker/celeba_vqvae.dockerfile
+      dockerfile: docker/img/celeba/celeba_vqvae.dockerfile
     image: vitvqganvae:celeba_vqvae
     shm_size: '32g'
     volumes:
@@ -154,7 +154,7 @@ services:
   vitvqganvae-train-celeba-rvq:
     build:
       context: .
-      dockerfile: docker/celeba_vqvae_rvq.dockerfile
+      dockerfile: docker/img/celeba/celeba_vqvae_rvq.dockerfile
     image: vitvqganvae:celeba_vqvae_rvq
     shm_size: '32g'
     volumes:
@@ -173,7 +173,7 @@ services:
   vitvqganvae-train-celeba-mhvq:
     build:
       context: .
-      dockerfile: docker/celeba_vqvae_mhvq.dockerfile
+      dockerfile: docker/img/celeba/celeba_vqvae_mhvq.dockerfile
     image: vitvqganvae:celeba_vqvae_mhvq
     shm_size: '32g'
     volumes:
@@ -192,7 +192,7 @@ services:
   vitvqganvae-train-celeba128-rvq:
     build:
       context: .
-      dockerfile: docker/celeba128_vqvae_rvq.dockerfile
+      dockerfile: docker/img/celeb128/celeba128_vqvae_rvq.dockerfile
     image: vitvqganvae:celeba128_vqvae_rvq
     shm_size: '32g'
     volumes:
@@ -207,16 +207,54 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-  
-  vitvqganvae-train-ffhq-mhvq:
+
+  vitvqganvae-train-ellipsoid-1024-mhvq:
     build:
       context: .
-      dockerfile: docker/ffhq256_vqvae_mhvq.dockerfile
-    image: vitvqganvae:ffhq256_vqvae_mhvq
+      dockerfile: docker/pointcloud/ellipsoid_1024_vqvae_mhvq.dockerfile
+    image: vitvqganvae:ellipsoid_1024_vqvae_mhvq
     shm_size: '32g'
     volumes:
       - ./.cache:/vitvqganvae/.cache  
       - ./outputs:/vitvqganvae/outputs  
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  vitvqganvae-train-mesh500-1024-mhvq:
+    build:
+      context: .
+      dockerfile: docker/pointcloud/mesh500_1024_vqvae_mhvq.dockerfile
+    image: vitvqganvae:mesh500_1024_vqvae_mhvq
+    shm_size: '32g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache  
+      - ./outputs:/vitvqganvae/outputs  
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  vitvqganvae-train-ffhq-mhvq:
+    build:
+      context: .
+      dockerfile: docker/img/ffhq/ffhq256_vqvae_mhvq.dockerfile
+    image: vitvqganvae:ffhq256_vqvae_mhvq
+    shm_size: '32g'
+    volumes:
+      - ./.cache:/vitvqganvae/.cache
+      - ./outputs:/vitvqganvae/outputs
     environment:
       - WANDB_API_KEY=${WANDB_API_KEY}
     deploy:

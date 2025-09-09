@@ -1,4 +1,5 @@
 import os
+import time
 import torch
 
 from pathlib import Path
@@ -325,12 +326,17 @@ class VQVAETrainer(Module):
 
             train_log = {}
 
+            step_start_time = time.time()
+            total_forward_time = 0
+            total_backward_time = 0
+
             for i in range(self._grad_accum_every):
                 is_last = i == (self._grad_accum_every - 1)
                 maybe_no_sync = partial(self.accelerator.no_sync, self._model) if not is_last else nullcontext
 
                 forward_kwargs = self.next_data_to_forward_kwargs(train_dl_iter)
 
+                forward_start_time = time.time()
                 with self.accelerator.autocast(), maybe_no_sync():
                     train_loss_dct: dict = self._model(**forward_kwargs)
                     
@@ -343,20 +349,32 @@ class VQVAETrainer(Module):
                         else:
                             raise ValueError(f"Loss key '{key}' not found in loss_lambda dictionary.")
                         train_loss += value
-                    self.accelerator.backward(train_loss / self._grad_accum_every)
+                total_forward_time += time.time() - forward_start_time
+
+                backward_start_time = time.time()
+                self.accelerator.backward(train_loss / self._grad_accum_every)
+                total_backward_time += time.time() - backward_start_time
 
                 accum_log(
                     train_log, 
                     {key: value / self._grad_accum_every for key, value in train_loss_dct.items()}
                 )
 
-            self.log(
-                **train_log,
-                lr = self.optimizer.optimizer.param_groups[0]['lr'],
-            )
-
+            optimizer_start_time = time.time()
             self.optimizer.step()
             self.optimizer.zero_grad()
+            optimizer_time = time.time() - optimizer_start_time
+
+            total_step_time = time.time() - step_start_time
+
+            self.log(
+                **train_log,
+                forward_time = total_forward_time,
+                backward_time = total_backward_time,
+                optimizer_time = optimizer_time,
+                total_step_time = total_step_time,
+                lr = self.optimizer.optimizer.param_groups[0]['lr'],
+            )
 
             if self.use_ema:
                 ema_model.update()
