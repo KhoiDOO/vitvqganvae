@@ -32,7 +32,7 @@ def main(args, extras):
     else:
         selected_gpus = list(args.gpu.split(","))
         n_gpus = len(selected_gpus)
-        os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
+        # os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
 
     cfg: ExperimentConfig = load_config(args.config, cli_args=extras, n_gpus=n_gpus, **{
         "train": args.train,
