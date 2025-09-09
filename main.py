@@ -71,11 +71,11 @@ def main(args, extras):
     model_config = config_to_primitive(model_config)
     model_cls = getattr(model, cfg.model)
     model_module = model_cls(**model_config)
-    try:
-        sample: Tensor = train_ds[0].unsqueeze(0)
-        summary(model_module, input_size=sample.shape)
-    except Exception as e:
-        print(f"Cannot run model summary: {e}")
+    # try:
+    #     sample: Tensor = train_ds[0].unsqueeze(0)
+    #     summary(model_module, input_size=sample.shape)
+    # except Exception as e:
+    #     print(f"Cannot run model summary: {e}")
 
     # trainer
     trainer_config_cls = getattr(trainer, cfg.trainer_config)
