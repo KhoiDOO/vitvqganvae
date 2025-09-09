@@ -20,7 +20,7 @@ from torchvision.utils import save_image
 from pytorch_custom_utils import add_wandb_tracker_contextmanager
 
 from accelerate import Accelerator
-from accelerate.utils import DistributedType, DistributedDataParallelKwargs
+from accelerate.utils import DistributedType, DistributedDataParallelKwargs, DataLoaderConfiguration
 
 from beartype import beartype
 from beartype.typing import Optional
@@ -149,10 +149,10 @@ class VQVAETrainer(Module):
         if 'kwargs_handlers' not in accelerator_kwargs:
             accelerator_kwargs['kwargs_handlers'] = [DEFAULT_DDP_KWARGS]
 
-        accelerator_kwargs['dataloader_config'] = {
-            "split_batches": True,
-            "even_batches": True,
-        }
+        accelerator_kwargs['dataloader_config'] = DataLoaderConfiguration(
+            split_batches = True,
+            even_batches = True,
+        )
 
         self.accelerator = Accelerator(
             **accelerator_kwargs
