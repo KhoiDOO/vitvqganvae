@@ -9,15 +9,9 @@ spec:
       schedulerName: volcano
       restartPolicy: Never
       volumes:
-      - name: home
-        persistentVolumeClaim:
-          claimName: dokh-pvc
       - name: project
         persistentVolumeClaim:
-          claimName: side-prj-share-1
-      - name: data
-        persistentVolumeClaim:
-          claimName: imagenet
+          claimName: side-prj-share-0
       - name: dshm
         emptyDir:
           medium: Memory
@@ -64,9 +58,7 @@ spec:
               trainer_kwargs.use_wandb_tracking=True
 
         volumeMounts:
-        - {name: home, mountPath: /workspace}
         - {name: project, mountPath: /mnt/project}
-        - {name: data, mountPath: /mnt/data}
         - {name: dshm, mountPath: /dev/shm}
         resources:
           limits:   { nvidia.com/gpu: 2, cpu: "24",  memory: "64Gi" }
