@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dokh-celebavqvae-mhvq
+  name: dokh-mesh500_1024-vqvae-mhvq
 spec:
   ttlSecondsAfterFinished: 60
   template:
