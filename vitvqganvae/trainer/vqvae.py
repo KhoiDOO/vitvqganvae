@@ -190,12 +190,10 @@ class VQVAETrainer(Module):
 
         self.custom_make_grid = None
         dataset_name = self.train_dataset.__class__.__name__.lower()
-        print(dataset_name)
         self.custom_make_grid = getattr(data, f"make_grid_{dataset_name}", None)
         
         if self.custom_make_grid is None:
-            raise NotImplementedError("Custom make_grid function not found.")
-        print(f"Custom make_grid function: {self.custom_make_grid.__name__ if self.custom_make_grid else None}")
+            raise NotImplementedError(f"Custom make_grid function not found for {dataset_name}.")
         
         (
             self._model,
@@ -303,7 +301,7 @@ class VQVAETrainer(Module):
         data = next(dl_iter)
 
         forward_kwargs = {
-            'img': data.to(self.device),
+            'img': data,
             'return_loss': True,
             'return_recons': False
         }
