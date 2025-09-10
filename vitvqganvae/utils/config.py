@@ -6,9 +6,6 @@ from glob import glob
 from omegaconf import OmegaConf, DictConfig
 from typing import Optional, Any, Union
 
-from sympy import false
-import torchvision
-
 OmegaConf.register_new_resolver("add", lambda a, b: a + b)
 OmegaConf.register_new_resolver("sub", lambda a, b: a - b)
 OmegaConf.register_new_resolver("mul", lambda a, b: a * b)
@@ -46,13 +43,14 @@ class ExperimentConfig:
     name: str = "default"
     exp_root_dir: str = "outputs"
 
-    ### these shouldn't be set manually
     exp_dir: str = ""
     trial_dir: str = ""
     n_gpus: int = 1
+    distributed_type: str = ""
+    mixed_precision : str = "no"
     seed: int = 42
-    train: bool = False  # whether to train the model
-    resume: bool = False  # whether to resume from a previous run
+    train: bool = False
+    resume: bool = False
 
     dataset_name: str = 'cifar10'
     dataset_source: str = 'torchvision'
@@ -111,7 +109,6 @@ def load_config(*yamls: str, cli_args: list = [], from_string=False, **kwargs) -
     assert isinstance(cfg, DictConfig)
     scfg = parse_structured(ExperimentConfig, cfg)
     return scfg
-
 
 def config_to_primitive(config, resolve: bool = True) -> Any:
     return OmegaConf.to_container(config, resolve=resolve)

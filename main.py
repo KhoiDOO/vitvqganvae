@@ -25,7 +25,10 @@ def main(args, extras):
     n_gpus = accelerator.num_processes
     selected_gpus = [str(i) for i in range(n_gpus)]
 
-    cfg: ExperimentConfig = load_config(args.config, cli_args=extras, n_gpus=n_gpus, **{
+    cfg: ExperimentConfig = load_config(args.config, cli_args=extras, **{
+        "n_gpus": n_gpus,
+        "distributed_type": accelerator.distributed_type,
+        "mixed_precision": accelerator.mixed_precision,
         "train": args.train,
         "resume": args.resume
     })
