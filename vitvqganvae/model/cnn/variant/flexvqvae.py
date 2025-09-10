@@ -1,11 +1,11 @@
 from torch import nn
 from einops import rearrange
 
-from .encoder import Encoder
-from .decoder import Decoder
-from ...utils.model.layer_map import cnn_mapping, cnn_2_ndim, rearrange_map
-from ..utils import rebuild_save_load
-from ...utils.helpers import count_parameters
+from ..encoder import Encoder
+from ..decoder import Decoder
+from ....utils.model.layer_map import cnn_mapping, cnn_2_ndim, rearrange_map
+from ...utils import rebuild_save_load
+from ....utils.helpers import count_parameters
 from pytorch_custom_utils import total_parameters
 
 from typing import Union
@@ -21,13 +21,14 @@ import os
 
 
 @dataclass
-class VQVAEConfig:
+class FlexVQVAEConfig:
     dim: int = 64
     in_channel: int = 3
     out_channel: int = 3
     layers: int = 4
     layer_mults: list[int] | None = None
-    num_res_blocks: int = 1
+    num_in_res_blocks: int = 1
+    num_out_res_blocks: int = 1
     group: int = 16
     conv_type: str = "conv2d"
     enc_act_func: str = "LeakyReLU"
@@ -50,7 +51,7 @@ class VQVAEConfig:
 @rebuild_save_load()
 @total_parameters()
 @beartype
-class VQVAE(nn.Module):
+class FlexVQVAE(nn.Module):
     def __init__(
         self, 
         dim: int,
@@ -58,7 +59,8 @@ class VQVAE(nn.Module):
         out_channel: int = 3,
         layers: int = 4,
         layer_mults: Union[list[int], None] = None,
-        num_res_blocks: Union[int, tuple[int, ...]] = 1,
+        num_in_res_blocks: Union[int, tuple[int, ...]] = 1,
+        num_out_res_blocks: Union[int, tuple[int, ...]] = 1,
         group: int = 16,
         conv_type: str = "conv2d",
         enc_act_func: str = "LeakyReLU",
@@ -87,7 +89,8 @@ class VQVAE(nn.Module):
         self._out_channel = out_channel
         self._layers = layers
         self._layer_mults = layer_mults
-        self._num_res_blocks = num_res_blocks
+        self._num_in_res_blocks = num_in_res_blocks
+        self._num_out_res_blocks = num_out_res_blocks
         self._group = group
         self._conv_type = conv_type
         self._enc_act_func = enc_act_func
@@ -103,7 +106,7 @@ class VQVAE(nn.Module):
 			in_channel=self._in_channel,
 			layers=self._layers,
 			layer_mults=self._layer_mults,
-			num_res_blocks=self._num_res_blocks,
+			num_res_blocks=self._num_in_res_blocks,
 			group=self._group,
 			conv_type=self._conv_type,
 			act_func=self._enc_act_func,
@@ -116,7 +119,7 @@ class VQVAE(nn.Module):
             out_channel=self._out_channel,
             layers=self._layers,
             layer_mults=self._layer_mults,
-            num_res_blocks=self._num_res_blocks,
+            num_res_blocks=self._num_out_res_blocks,
             group=self._group,
             conv_type=self._conv_type,
             act_func=self._dec_act_func,
@@ -268,8 +271,12 @@ class VQVAE(nn.Module):
         return self._layer_mults
 
     @property
-    def num_res_blocks(self) -> int | tuple[int]:
-        return self._num_res_blocks
+    def num_in_res_blocks(self) -> int | tuple[int]:
+        return self._num_in_res_blocks
+
+    @property
+    def num_out_res_blocks(self) -> int | tuple[int]:
+        return self._num_out_res_blocks
 
     @property
     def group(self) -> int:
