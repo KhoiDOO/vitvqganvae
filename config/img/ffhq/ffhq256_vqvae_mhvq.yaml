@@ -15,7 +15,7 @@ dataset_kwargs:
 model: VQVAE
 model_config: VQVAEConfig
 model_kwargs:
-  dim: 128
+  dim: 256
   in_channel: 3
   out_channel: 3
   layers: 4

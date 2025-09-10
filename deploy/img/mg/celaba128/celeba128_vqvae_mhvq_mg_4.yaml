@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dokh-celebavqvae-mg-4
+  name: dokh-bench-celebavqvae-mhvq-mg-4
 spec:
   ttlSecondsAfterFinished: 60
   template:
@@ -9,12 +9,12 @@ spec:
       schedulerName: volcano
       restartPolicy: Never
       volumes:
-      - name: home
-        persistentVolumeClaim:
-          claimName: dokh-pvc
       - name: project
         persistentVolumeClaim:
-          claimName: side-prj-share-0
+          claimName: prj-2
+      - name: data
+        persistentVolumeClaim:
+          claimName: celeba-2
       - name: dshm
         emptyDir:
           medium: Memory
@@ -55,14 +55,14 @@ spec:
               --num_machines=1 \
               --dynamo_backend=no \
               main.py \
-              --config config/img/celeba/celeba_vqvae.yaml \
-              --gpu "0,1,2,3" \
+              --config config/img/celeba128/celeba128_vqvae_mhvq.yaml \
               --train \
-              trainer_kwargs.use_wandb_tracking=True
+              trainer_kwargs.use_wandb_tracking=True \
+              dataset_kwargs.root=/mnt/data/celeba
 
         volumeMounts:
-        - {name: home, mountPath: /workspace}
         - {name: project, mountPath: /mnt/project}
+        - {name: data, mountPath: /mnt/data}
         - {name: dshm, mountPath: /dev/shm}
         resources:
           limits:   { nvidia.com/gpu: 4, cpu: "24",  memory: "64Gi" }
