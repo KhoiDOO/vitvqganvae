@@ -50,7 +50,7 @@ spec:
             fi
             wandb login ${WANDB_API_KEY}
             accelerate launch \
-              --config_file acc_config/mgfsdp/mg_4_non_former.yaml \
+              --config_file acc_config/mgfsdp/mgfsdp_4_non_former.yaml \
               main.py \
               --config config/img/celeba128/celeba128_vqvae_mhvq.yaml \
               --train \
