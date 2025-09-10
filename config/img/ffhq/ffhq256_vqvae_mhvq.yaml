@@ -20,7 +20,7 @@ model_kwargs:
   out_channel: 3
   layers: 4
   layer_mults: null
-  num_res_blocks: 2
+  num_res_blocks: 1
   group: 16
   conv_type: "conv2d"
   enc_act_func: "LeakyReLU"
@@ -29,7 +29,7 @@ model_kwargs:
   dec_act_kwargs: {"dim": 1}
   first_conv_kernel_size: 5
   quantizer: "VectorQuantize"
-  codebook_size: 512
+  codebook_size: 1024
   quantizer_kwargs: {
     "codebook_dim": 128,
     "decay" : 0.99,
