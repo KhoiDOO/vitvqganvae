@@ -8,7 +8,7 @@ from ..utils import rebuild_save_load
 from ...utils.helpers import count_parameters
 from pytorch_custom_utils import total_parameters
 
-from typing import Union
+from beartype.typing import Union
 from beartype import beartype
 from dataclasses import dataclass, field
 

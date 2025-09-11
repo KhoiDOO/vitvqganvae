@@ -4,7 +4,7 @@ from ...utils.helpers import default
 
 from torch import nn, Tensor
 
-from typing import Union
+from beartype.typing import Union
 from beartype import beartype
 
 @beartype
