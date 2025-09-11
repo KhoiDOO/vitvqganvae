@@ -13,15 +13,15 @@ import torch
 @beartype
 class ImgEncoder(nn.Module):
     def __init__(
-            self,
-            image_size: Union[tuple[int, int], int],
-            patch_size: Union[tuple[int, int], int],
-            in_channel: int = 3,
-            dim: int = 512,
-            depth: int = 6,
-            heads: int = 8,
-            **kwargs
-        ):
+        self,
+        image_size: Union[tuple[int, int], int],
+        patch_size: Union[tuple[int, int], int],
+        in_channel: int = 3,
+        dim: int = 512,
+        depth: int = 6,
+        heads: int = 8,
+        **attn_kwargs
+    ):
         super().__init__()
 
         self._image_size = image_size
@@ -35,7 +35,7 @@ class ImgEncoder(nn.Module):
         self._patch_height, self._patch_width = patch_size if isinstance(patch_size, tuple) else (patch_size, patch_size)
 
         assert self._image_height % self._patch_height == 0 and self._image_width % self._patch_width == 0, 'Image dimensions must be divisible by the patch size.'
-        assert 'causal' not in kwargs, 'cannot set causality on ImgEncoder'
+        assert 'causal' not in attn_kwargs, 'cannot set causality on ImgEncoder'
 
         self._num_patches = (self._image_height // self._patch_height) * (self._image_width // self._patch_width)
         self._patch_dim = self._in_channel * self._patch_height * self._patch_width
@@ -49,7 +49,7 @@ class ImgEncoder(nn.Module):
             dim = self._dim,
             depth = self._depth,
             heads = self._heads,
-            **kwargs
+            **attn_kwargs
         )
 
         self.apply(init_weights)
