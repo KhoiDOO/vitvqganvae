@@ -21,7 +21,7 @@ model_kwargs:
   in_channel: 3
   out_channel: 3
   dim: 128
-  depth: 4
+  depth: 3
   heads: 6
   encoder_attn_kwargs:
     attn_flash: True
