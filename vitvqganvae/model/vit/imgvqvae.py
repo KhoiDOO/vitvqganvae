@@ -1,8 +1,8 @@
 from torch import nn
 from einops import rearrange
 
-from .encoder import ImgEncoder
-from .decoder import ImgDecoder
+from .encoder import ImgVITEncoder
+from .decoder import ImgVITDecoder
 from ..utils import rebuild_save_load
 from ...utils.helpers import count_parameters
 from pytorch_custom_utils import total_parameters
@@ -20,9 +20,9 @@ import os
 
 
 @dataclass
-class ImgVQVAEConfig:
-    image_size: Union[tuple[int, int], int] = 256
-    patch_size: Union[tuple[int, int], int] = 8
+class ImgVITVQVAEConfig:
+    image_size: int = 256
+    patch_size: int = 8
     in_channel: int = 3
     out_channel: int = 3
     dim: int = 512
@@ -45,7 +45,7 @@ class ImgVQVAEConfig:
 @rebuild_save_load()
 @total_parameters()
 @beartype
-class ImgVQVAE(nn.Module):
+class ImgVITVQVAE(nn.Module):
     def __init__(
         self,
         image_size: Union[tuple[int, int], int] = 256,
@@ -84,23 +84,23 @@ class ImgVQVAE(nn.Module):
                 "use_cosine_sim": True
             }
 
-        self.encoder = ImgEncoder(
+        self.encoder = ImgVITEncoder(
             image_size = self._image_size,
-            patch_size = self._patch_size,
-            in_channel = self._in_channel,
-            dim = self._dim,
-            depth = self._depth,
-            heads = self._heads,
+            patch_size=self._patch_size,
+            in_channel=self._in_channel,
+            dim=self._dim,
+            depth=self._depth,
+            heads=self._heads,
             **self._encoder_attn_kwargs
         )
 
-        self.decoder = ImgDecoder(
-            image_size = self._image_size,
-            patch_size = self._patch_size,
-            out_channel = self._out_channel,
-            dim = self._dim,
-            depth = self._depth,
-            heads = self._heads,
+        self.decoder = ImgVITDecoder(
+            image_size=self._image_size,
+            patch_size=self._patch_size,
+            out_channel=self._out_channel,
+            dim=self._dim,
+            depth=self._depth,
+            heads=self._heads,
             **self._decoder_attn_kwargs
         )
 

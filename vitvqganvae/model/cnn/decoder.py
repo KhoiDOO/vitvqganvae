@@ -10,17 +10,17 @@ from beartype import beartype
 @beartype
 class Decoder(nn.Module):
     def __init__(
-            self,
-            dim: int,
-            out_channel: int = 3,
-            layers: int = 4,
-            layer_mults: Union[list[int], None] = None,
-            num_res_blocks: Union[int, tuple[int, ...]] = 1,
-            group: int = 16,
-            conv_type: str = "conv2d",
-            act_func: str = "GLU",
-            act_kwargs: dict = {"dim": 1}
-        ):
+        self,
+        dim: int,
+        out_channel: int = 3,
+        layers: int = 4,
+        layer_mults: Union[list[int], None] = None,
+        num_res_blocks: Union[int, tuple[int, ...]] = 1,
+        group: int = 16,
+        conv_type: str = "conv2d",
+        act_func: str = "GLU",
+        act_kwargs: dict = {"dim": 1}
+    ):
         super().__init__()
         
         self._dim = dim

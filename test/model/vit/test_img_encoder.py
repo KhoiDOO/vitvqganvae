@@ -1,8 +1,8 @@
 import unittest
 import torch
-from vitvqganvae.model.vit.encoder import ImgEncoder
+from vitvqganvae.model.vit.encoder import ImgVITEncoder
 
-class TestImgEncoder(unittest.TestCase):
+class TestImgVITEncoder(unittest.TestCase):
     def setUp(self):
         self.image_size = (32, 32)
         self.patch_size = (8, 8)
@@ -10,7 +10,7 @@ class TestImgEncoder(unittest.TestCase):
         self.dim = 16
         self.depth = 2
         self.heads = 2
-        self.encoder = ImgEncoder(
+        self.encoder = ImgVITEncoder(
             image_size=self.image_size,
             patch_size=self.patch_size,
             in_channel=self.in_channel,
@@ -57,11 +57,11 @@ class TestImgEncoder(unittest.TestCase):
 
     def test_invalid_patch_size(self):
         with self.assertRaises(AssertionError):
-            ImgEncoder(image_size=(32, 32), patch_size=(7, 7))
+            ImgVITEncoder(image_size=(32, 32), patch_size=(7, 7))
 
     def test_causal_kwarg(self):
         with self.assertRaises(AssertionError):
-            ImgEncoder(image_size=(32, 32), patch_size=(8, 8), causal=True)
+            ImgVITEncoder(image_size=(32, 32), patch_size=(8, 8), causal=True)
 
 if __name__ == '__main__':
     unittest.main()

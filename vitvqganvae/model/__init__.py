@@ -1,26 +1,30 @@
 __all__ = [
-    "hf",
-    "vit",
-    "cnn",
     "VQVAEPipeline",
-    "encoder",
-    "decoder",
-    "block",
+    "FlexVQVAEPipeline",
+
     "Encoder",
     "Decoder",
     "VQVAE",
     "VQVAEConfig",
+
     "FlexVQVAE",
-    "FlexVQVAEConfig"
+    "FlexVQVAEConfig",
+
+    "ImgVITEncoder",
+    "ImgVITDecoder",
+    "ImgVITVQVAE",
+    "ImgVITVQVAEConfig"
 ]
 
-from . import hf, vit, cnn
-from .hf import VQVAEPipeline
+from .hf import VQVAEPipeline, FlexVQVAEPipeline
 
-from .cnn import encoder, decoder, block
 from .cnn.encoder import Encoder
 from .cnn.decoder import Decoder
 from .cnn.vqvae import VQVAE, VQVAEConfig
 from .cnn.variant import (
     FlexVQVAE, FlexVQVAEConfig
 )
+
+from .vit.encoder import ImgVITEncoder
+from .vit.decoder import ImgVITDecoder
+from .vit.imgvqvae import ImgVITVQVAE, ImgVITVQVAEConfig

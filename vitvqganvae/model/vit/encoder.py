@@ -11,7 +11,7 @@ from ..utils import init_weights
 import torch
 
 @beartype
-class ImgEncoder(nn.Module):
+class ImgVITEncoder(nn.Module):
     def __init__(
         self,
         image_size: Union[tuple[int, int], int],
@@ -46,9 +46,10 @@ class ImgEncoder(nn.Module):
         )
         self.en_pos_embedding = nn.Parameter(torch.randn(1, self._num_patches, self._dim))
         self.attn_layers = AttentionLayers(
-            dim = self._dim,
-            depth = self._depth,
-            heads = self._heads,
+            dim=self._dim,
+            depth=self._depth,
+            heads=self._heads,
+            causal=False,
             **attn_kwargs
         )
 

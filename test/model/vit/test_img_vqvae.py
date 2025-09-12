@@ -3,9 +3,9 @@ import unittest
 import torch
 import os
 import tempfile
-from vitvqganvae.model.vit.imgvqvae import ImgVQVAE
+from vitvqganvae.model.vit.imgvqvae import ImgVITVQVAE
 
-class TestImgVQVAE(unittest.TestCase):
+class TestImgVITVQVAE(unittest.TestCase):
 	def setUp(self):
 		self.image_size = 16
 		self.patch_size = 4
@@ -15,7 +15,7 @@ class TestImgVQVAE(unittest.TestCase):
 		self.depth = 2
 		self.heads = 2
 		self.codebook_size = 8
-		self.model = ImgVQVAE(
+		self.model = ImgVITVQVAE(
 			image_size=self.image_size,
 			patch_size=self.patch_size,
 			in_channel=self.in_channel,
@@ -62,7 +62,7 @@ class TestImgVQVAE(unittest.TestCase):
 			path = os.path.join(tmpdir, "vqvae.pth")
 			self.model.save(path)
 			self.assertTrue(os.path.exists(path))
-			model2 = ImgVQVAE(
+			model2 = ImgVITVQVAE(
 				image_size=self.image_size,
 				patch_size=self.patch_size,
 				in_channel=self.in_channel,
@@ -102,7 +102,7 @@ class TestImgVQVAE(unittest.TestCase):
 
 	def test_state_dict_and_load_state_dict(self):
 		state = self.model.state_dict()
-		model2 = ImgVQVAE(
+		model2 = ImgVITVQVAE(
 			image_size=self.image_size,
 			patch_size=self.patch_size,
 			in_channel=self.in_channel,

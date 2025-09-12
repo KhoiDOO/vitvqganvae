@@ -13,7 +13,7 @@ from vitvqganvae import data
 
 from torch.optim import Optimizer, lr_scheduler
 from torch.optim.lr_scheduler import _LRScheduler
-from ..utils import OptimizerWithWarmupSchedule
+from .utils import OptimizerWithWarmupSchedule
 
 from torchvision.utils import save_image
 from pytorch_custom_utils import add_wandb_tracker_contextmanager
@@ -26,8 +26,8 @@ from beartype.typing import Optional
 
 from ema_pytorch import EMA
 
-from .. import opt
-from ...utils.helpers import cycle, divisible_by, accum_log
+from . import opt
+from ..utils.helpers import cycle, divisible_by, accum_log
 
 
 DEFAULT_DDP_KWARGS = DistributedDataParallelKwargs(

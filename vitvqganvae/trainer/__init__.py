@@ -1,3 +1,2 @@
 from .vqvae import VQVAETrainer, VQVAETrainerConfig
-
-from .app import PCVQVAETrainer, PCVQVAETrainerConfig
+from .pcvqvae import PCVQVAETrainer, PCVQVAETrainerConfig

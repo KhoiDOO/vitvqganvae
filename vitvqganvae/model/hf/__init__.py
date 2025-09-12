@@ -1,1 +1,1 @@
-from .vqvae import VQVAEPipeline
+from .vqvae import VQVAEPipeline, FlexVQVAEPipeline
