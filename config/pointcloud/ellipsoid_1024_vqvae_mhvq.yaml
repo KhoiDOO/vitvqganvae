@@ -64,7 +64,7 @@ trainer_kwargs:
   loss_lambda:
     recon_loss: 1.
     quantizer_loss: 1.
-  checkpoint_every: 500
+  checkpoint_every: null
   warmup_steps: 0
   use_wandb_tracking: False
   resume: False

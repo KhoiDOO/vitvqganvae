@@ -386,6 +386,12 @@ class PCVQVAETrainer(Module):
                         best_loss = val_losses["val_recon_loss"]
                         best_step = step
 
+                        self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_best.pt'))
+                        if self.use_ema:
+                            self.save_ema(os.path.join(self.checkpoint_folder, f'model_ckpt_ema_best.pt'))
+                        
+                    self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_last.pt'))
+
                 self._model.train()
 
             if self._checkpoint_every:
