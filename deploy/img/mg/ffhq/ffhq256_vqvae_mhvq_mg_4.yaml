@@ -21,7 +21,7 @@ spec:
           sizeLimit: 16Gi
       containers:
       - name: ffhq
-        image: kohido/base_dl_cuda129:v0.0.6
+        image: kohido/base_dl_cuda129:v0.0.7
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
