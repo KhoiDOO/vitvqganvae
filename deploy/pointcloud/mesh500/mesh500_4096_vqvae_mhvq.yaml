@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: dokh-mesh500-1024-vqvae-mhvq
+  name: dokh-mesh500-4096-vqvae-mhvq
 spec:
   ttlSecondsAfterFinished: 60
   template:
@@ -18,7 +18,7 @@ spec:
           sizeLimit: 16Gi
       containers:
       - name: celeba
-        image: kohido/base_dl_cuda129:v0.0.6
+        image: kohido/base_dl_cuda129:v0.0.7
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
