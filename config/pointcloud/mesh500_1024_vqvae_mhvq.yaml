@@ -10,7 +10,6 @@ dataset_source: hf
 dataset_img_key: null
 dataset_kwargs:
   root: ./.cache/${dataset_name}
-  augment: False
 
 model: VQVAE
 model_config: VQVAEConfig

@@ -20,7 +20,9 @@ class Ellipsoid1024(Dataset):
 
     def __getitem__(self, index: int) -> Tensor:
         points = self._dataset[index]['points']
-        points: Tensor = torch.from_numpy(np.array(points))
+        points: np.ndarray = np.array(points)
+        points = points[np.lexsort((points[:, 2], points[:, 1], points[:, 0]))]
+        points: Tensor = torch.from_numpy(points)
         points = points.float()
         points = points.permute(1, 0)
         return points
