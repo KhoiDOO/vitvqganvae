@@ -40,10 +40,6 @@ class Mesh500(Dataset):
     @property
     def root(self) -> str:
         return self._root
-    
-    @property
-    def __class__(self):
-        return f'mesh500_{self._num_points}'
 
 
 def get_mesh500(root: str | None = None, num_points: int = 1024, split: float = 0.8) -> tuple[Mesh500, Mesh500]:
@@ -61,9 +57,5 @@ def get_mesh500_1024(root: str | None = None, split: float = 0.8) -> tuple[Mesh5
 def get_mesh500_4096(root: str | None = None, split: float = 0.8) -> tuple[Mesh500, Mesh500]:
     return get_mesh500(root=root, num_points=4096, split=split)
 
-def make_grid_mesh500_1024(points: Tensor) -> Tensor:
+def make_grid_mesh500(points: Tensor) -> Tensor:
     pass
-
-def make_grid_mesh500_4096(points: Tensor) -> Tensor:
-    pass
-    
