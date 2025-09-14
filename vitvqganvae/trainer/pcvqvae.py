@@ -19,7 +19,7 @@ from torchvision.utils import save_image
 from pytorch_custom_utils import add_wandb_tracker_contextmanager
 
 from accelerate import Accelerator
-from accelerate.utils import DistributedType, DistributedDataParallelKwargs
+from accelerate.utils import DistributedType, DistributedDataParallelKwargs, DataLoaderConfiguration
 
 from beartype import beartype
 from beartype.typing import Optional
