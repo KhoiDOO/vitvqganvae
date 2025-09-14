@@ -43,7 +43,7 @@ class Mesh500(Dataset):
     
     @property
     def __class__(self):
-        return f'{self.__class__}_{self._num_points}'
+        return f'mesh500_{self._num_points}'
 
 
 def get_mesh500(root: str | None = None, num_points: int = 1024, split: float = 0.8) -> tuple[Mesh500, Mesh500]:
