@@ -17,6 +17,7 @@ class Mesh500(Dataset):
             raise ValueError("num_points should be one of 1024 or 4096 for Mesh500 dataset")
 
         self._root = root
+        self._num_points = num_points
         self._dataset = load_dataset(f"kohido/mesh500_{num_points}pts", cache_dir=self._root)['train']['points']
 
     def __len__(self) -> int:
@@ -39,6 +40,10 @@ class Mesh500(Dataset):
     @property
     def root(self) -> str:
         return self._root
+    
+    @property
+    def __class__(self):
+        return f'{self.__class__}_{self._num_points}'
 
 
 def get_mesh500(root: str | None = None, num_points: int = 1024, split: float = 0.8) -> tuple[Mesh500, Mesh500]:
