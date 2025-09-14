@@ -55,3 +55,10 @@ def get_mesh500_1024(root: str | None = None, split: float = 0.8) -> tuple[Mesh5
 
 def get_mesh500_4096(root: str | None = None, split: float = 0.8) -> tuple[Mesh500, Mesh500]:
     return get_mesh500(root=root, num_points=4096, split=split)
+
+def make_grid_mesh500_1024(points: Tensor) -> Tensor:
+    pass
+
+def make_grid_mesh500_4096(points: Tensor) -> Tensor:
+    pass
+    

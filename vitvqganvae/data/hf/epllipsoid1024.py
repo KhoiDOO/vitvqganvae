@@ -34,3 +34,6 @@ def get_ellipsoid1024(root: str | None = None) -> tuple[Ellipsoid1024, Ellipsoid
     train_ds = Ellipsoid1024(root=root, split="train")
     valid_ds = Ellipsoid1024(root=root, split="val")
     return train_ds, valid_ds
+
+def make_grid_ellipsoid1024(points: Tensor) -> Tensor:
+    pass
