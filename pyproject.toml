@@ -1,6 +1,6 @@
 [project]
 name = "vitvqganvae"
-version = "0.4.6"
+version = "0.4.7"
 authors = [
   { name="KhoiDOO", email="khoido8899@gmail.com" },
 ]
@@ -25,8 +25,7 @@ dependencies = [
   "datasets==4.0.0",
   "wandb==0.21.1",
   "scikit-learn==1.7.1",
-  "x-transformers==2.7.4",
-  "chamferdist==1.0.3"
+  "x-transformers==2.7.4"
 ]
 
 [tool.setuptools.packages.find]

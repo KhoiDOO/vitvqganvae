@@ -48,7 +48,7 @@ spec:
             wandb login ${WANDB_API_KEY}
             accelerate launch \
               --mixed_precision=no \
-              --num_processes=2 \
+              --num_processes=4 \
               --num_machines=1 \
               --dynamo_backend=no \
               main.py \
@@ -60,5 +60,5 @@ spec:
         - {name: project, mountPath: /mnt/project}
         - {name: dshm, mountPath: /dev/shm}
         resources:
-          limits:   { nvidia.com/gpu: 2, cpu: "24",  memory: "64Gi" }
-          requests: { nvidia.com/gpu: 2, cpu: "16",  memory: "64Gi" }
+          limits:   { nvidia.com/gpu: 4, cpu: "24",  memory: "64Gi" }
+          requests: { nvidia.com/gpu: 4, cpu: "16",  memory: "64Gi" }
