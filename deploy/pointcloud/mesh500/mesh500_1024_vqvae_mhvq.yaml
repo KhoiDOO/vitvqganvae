@@ -48,13 +48,12 @@ spec:
             wandb login ${WANDB_API_KEY}
             accelerate launch \
               --mixed_precision=no \
-              --num_processes=1 \
+              --num_processes=2 \
               --num_machines=1 \
               --dynamo_backend=no \
               main.py \
-              --config config/pointcloud/mesh500_1024_vqvae_mhvq.yaml \
+              --config config/pointcloud/mesh500/mesh500_1024_vqvae_mhvq.yaml \
               --train \
-              dataset_kwargs.root=/mnt/data/mesh500_1024 \
               trainer_kwargs.use_wandb_tracking=True
 
         volumeMounts:

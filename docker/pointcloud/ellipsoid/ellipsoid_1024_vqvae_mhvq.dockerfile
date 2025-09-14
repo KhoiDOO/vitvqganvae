@@ -16,6 +16,6 @@ CMD wandb login ${WANDB_API_KEY} && accelerate launch \
     --num_machines=1 \
     --dynamo_backend=no \
     main.py \
-    --config config/pointcloud/mesh500_1024_vqvae_mhvq.yaml \
+    --config config/pointcloud/ellipsoid/ellipsoid_1024_vqvae_mhvq.yaml \
     --train \
     trainer_kwargs.use_wandb_tracking=True

@@ -41,7 +41,7 @@ class Mesh500(Dataset):
         return self._root
 
 
-def get_mesh500(root: str | None = None, num_points: int = 1024, split: list[int] = [60000, 10000]) -> tuple[Mesh500, Mesh500]:
+def get_mesh500(root: str | None = None, num_points: int = 1024, split: float = 0.8) -> tuple[Mesh500, Mesh500]:
     assert root is not None, "Please provide the path to the Mesh500 dataset root directory"
 
     dataset = Mesh500(root=root, num_points=num_points)
@@ -50,8 +50,8 @@ def get_mesh500(root: str | None = None, num_points: int = 1024, split: list[int
     train_ds, valid_ds = random_split(dataset, split)
     return train_ds, valid_ds
 
-def get_mesh500_1024(root: str | None = None, split: list[int] = [60000, 10000]) -> tuple[Mesh500, Mesh500]:
+def get_mesh500_1024(root: str | None = None, split: float = 0.8) -> tuple[Mesh500, Mesh500]:
     return get_mesh500(root=root, num_points=1024, split=split)
 
-def get_mesh500_4096(root: str | None = None, split: list[int] = [60000, 10000]) -> tuple[Mesh500, Mesh500]:
+def get_mesh500_4096(root: str | None = None, split: float = 0.8) -> tuple[Mesh500, Mesh500]:
     return get_mesh500(root=root, num_points=4096, split=split)
