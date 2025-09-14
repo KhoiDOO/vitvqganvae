@@ -136,12 +136,10 @@ class VQVAETrainer(Module):
             raise NotImplementedError("Resume training is not implemented yet.")
 
         self.checkpoint_folder = os.path.join(trial_dir, "checkpoints")
-        if not os.path.exists(self.checkpoint_folder):
-            os.makedirs(self.checkpoint_folder)
+        os.makedirs(self.checkpoint_folder, exist_ok=True)
 
         self.generation_folder = os.path.join(trial_dir, "generation")
-        if not os.path.exists(self.generation_folder):
-            os.makedirs(self.generation_folder)
+        os.makedirs(self.generation_folder, exist_ok=True)
         
         if use_wandb_tracking:
             accelerator_kwargs['log_with'] = 'wandb'
