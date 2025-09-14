@@ -14,5 +14,5 @@ class PCVQVAETrainerConfig(VQVAETrainerConfig):
 @add_wandb_tracker_contextmanager()
 class PCVQVAETrainer(VQVAETrainer):
     def __init__(self, *args, **kwargs):
-        assert 'save_results_every' not in kwargs, "save_results_every is not allowed for PCVQVAETrainer"
-        super().__init__(save_results_every=None, *args, **kwargs)
+        assert kwargs.get('save_results_every') is None, "save_results_every is not allowed for PCVQVAETrainer"
+        super().__init__(*args, **kwargs)
