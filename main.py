@@ -67,7 +67,12 @@ def main(args, extras):
     model_module = model_cls(**model_config)
     try:
         sample: Tensor = train_ds[0].unsqueeze(0)
-        summary(copy.deepcopy(model_module), input_size=sample.shape)
+        summary(
+            copy.deepcopy(model_module),
+            input_data=sample,
+            col_names=["input_size", "output_size", "num_params", "params_percent", "trainable"],
+            # depth=2
+        )
     except Exception as e:
         print(f"Cannot run model summary: {e}")
 
