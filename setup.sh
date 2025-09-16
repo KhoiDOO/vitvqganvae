@@ -6,7 +6,7 @@ if [ -n "$CONDA_ENV" ]; then
     # This is required to activate conda environment
     eval "$(conda shell.bash hook)"
 
-    conda create -n $CONDA_ENV python=3.10.0 -y
+    conda create --prefix ./envs/$CONDA_ENV python=3.10.0 -y
     conda activate $CONDA_ENV
 
     conda install -c nvidia cuda-toolkit=12.9 -y
