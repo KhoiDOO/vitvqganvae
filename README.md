@@ -74,10 +74,10 @@ conda activate vitvqganvae
 ```
 
 ### 🐳 Docker
-We provide docker image file in folder <code>docker</code> and services in <code>docker-compose.yaml</code>. All images are based on [kohido/base_dl_cuda129:v0.0.6](https://hub.docker.com/r/kohido/base_dl_cuda129). In this image all required packages are built. 
+We provide docker image file in folder <code>docker</code> and services in <code>docker-compose.yaml</code>. All images are based on [kohido/base_dl_cuda129:v0.0.7](https://hub.docker.com/r/kohido/base_dl_cuda129). In this image all required packages are built. 
 
 ### ☸️ Kubernetes
-We provide [Kubernetes](https://github.com/kubernetes/kubernetes) <code>*.yaml</code> files in folder <code>deploy</code>. The image is also built upon the image [kohido/base_dl_cuda129:v0.0.6](https://hub.docker.com/r/kohido/base_dl_cuda129). For multi-gpu/multi-node training with Kubernetes, we provide corresponding <code>*.yaml</code> in folder <code>deploy/mg</code>.
+We provide [Kubernetes](https://github.com/kubernetes/kubernetes) <code>*.yaml</code> files in folder <code>deploy</code>. The image is also built upon the image [kohido/base_dl_cuda129:v0.0.7](https://hub.docker.com/r/kohido/base_dl_cuda129). For multi-gpu/multi-node training with Kubernetes, we provide corresponding <code>*.yaml</code> in folder <code>deploy/mg</code>.
 
 
 ### 📊 Logging with Wandb
@@ -91,7 +91,7 @@ WANDB_ENTITY=<your_project_entity>
 WANDB_API_KEY=<your_wandb_api_key>
 ```
 
-For Docker user, you will need to create a file ```.env```, which has the same template as above and add that file to a secret and then modift the secret name in ```.yaml``` file. An example is shown as follows:
+For Kubernetes user, you will need to create a file ```.env```, which has the same template as above and add that file to a secret and then modify the secret name in ```.yaml``` file. An example is shown as follows:
 ```yaml
 env:
 - name: GITHUB_TOKEN
@@ -119,6 +119,7 @@ We provide checkpoints and demo for using checkpoint via GoogleColab notebook. M
 | CelebA | 64 x 64 | $$7\times 10^{-5}$$ | 🟩 MHVQ| <a href="https://huggingface.co/kohido/celeba_vqvae_mhvq">🤗 HF</a> | |
 | CelebA | 128 x 128 | $$6\times 10^{-4}$$ | 🟩 RVQ| <a href="https://huggingface.co/kohido/celeba128_vqvae_rvq">🤗 HF</a> | |
 | CelebA | 128 x 128 | $$4\times 10^{-4}$$ | 🟩 GRVQ| <a href="https://huggingface.co/kohido/celeba128_vqvae_grvq">🤗 HF</a> | <a href="https://colab.research.google.com/drive/11RbDpioFj3MAFYy2O-P5d_J7H40uhPjS?usp=sharing">📓 Colab |
+| CelebA | 128 x 128 | $$4\times 10^{-4}$$ | 🟩 MHVQ| <a href="https://huggingface.co/kohido/celeba128_vqvae_mhvq">🤗 HF</a> | <a href="https://colab.research.google.com/drive/1m_J0l1_JDBCdsHa1qwcdf7g-5w8TzYFb?usp=sharing">📓 Colab |
 | FFHQ | 256 x 256 | $$4.1\times 10^{-3}$$ | 🟩 MHVQ| <a href="https://huggingface.co/kohido/ffhq256_vqvae_mhvq">🤗 HF</a> | <a href="https://colab.research.google.com/drive/1PiFA0dFvcsVUwRh9x2VLhBecj2oYL3eP?usp=sharing">📓 Colab |
 
 ## 🏋️‍♂️ Train
@@ -140,18 +141,26 @@ accelerate launch \
 ```
 
 ### 🐳 Docker
-To train using Docker, use <code>docker-compose</code> to run the provided services in <code>docker-compose.yaml</code>
+To train using Docker the compose fragments are split under `docker/compose/` and a small helper script is provided to assemble them.
+
+Recommended (helper script):
 ```bash
-docker compose up <service-name>
+# list available fragments / service names
+./compose-up.sh list
+
+# bring up a single service (example)
+./compose-up.sh up celeba128_vqvae_rvq --build --force-recreate
+
+# bring up all fragments without a specific service
+./compose-up.sh up
 ```
-In case, some non-related errors happens, after fixing that you might consider rebuild or recreate images.
+
+If you prefer to run `docker compose` directly, pass the top-level compose file and the fragments you want:
 ```bash
-docker compose up <service-name> --build --force-create
+docker compose -f docker-compose.yaml -f docker/compose/img/celeba/celeba128_vqvae_rvq.yaml up --build --force-recreate
 ```
-To train a Residual Vector Quantization (RVQ) VAE on the CelebA dataset, you can use the following command
-```bash
-docker compose up vitvqganvae-train-celeba128-rvq --build --force-create
-```
+
+Note: `./compose-up.sh` searches `docker/compose` recursively and will include all `*.yaml`/`*.yml` fragments it finds, so you don't need to list them manually.
 
 ### ☸️ Kubernetes
 To train using Kubernetes, after setting up the environment, use the following command to run a pod.
