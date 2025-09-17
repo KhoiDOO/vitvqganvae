@@ -28,7 +28,7 @@ from beartype.typing import Optional
 from ema_pytorch import EMA
 
 from . import opt
-from ..utils.helpers import cycle, divisible_by, accum_log
+from ..utils.helpers import cycle, divisible_by, accum_log, default
 
 
 DEFAULT_DDP_KWARGS = DistributedDataParallelKwargs(
@@ -93,6 +93,7 @@ class VQVAETrainer(Module):
         loss_lambda: dict = dict(),
         checkpoint_every: int | None = None,
         save_results_every: int | None = None,
+        checkpoint_key: str | None = None,
         warmup_steps: int = 1000,
         use_wandb_tracking: bool = False,
         resume: bool = False,
@@ -125,6 +126,7 @@ class VQVAETrainer(Module):
         self._loss_lambda = loss_lambda
         self._checkpoint_every = checkpoint_every
         self._save_results_every = save_results_every
+        self._checkpoint_key = default(checkpoint_key, "val_recon_loss")
         self._warmup_steps = warmup_steps
         self._use_wandb_tracking = use_wandb_tracking
         self._resume = resume
@@ -413,8 +415,8 @@ class VQVAETrainer(Module):
                     self.log(**val_losses)
                     self.print(f"Step {step}: Train Loss: {train_loss.item()} - Validation Loss: {val_losses}")
 
-                    if val_losses["val_recon_loss"] < best_loss:
-                        best_loss = val_losses["val_recon_loss"]
+                    if val_losses[self._checkpoint_key] < best_loss:
+                        best_loss = val_losses[self._checkpoint_key]
                         best_step = step
 
                         self.save(os.path.join(self.checkpoint_folder, f'model_ckpt_best.pt'))
