@@ -57,6 +57,7 @@ class VQVAETrainerConfig:
     loss_lambda: dict = dict(),
     checkpoint_every: int | None = None,
     save_results_every: int | None = None,
+    checkpoint_key: str | None = None,
     warmup_steps: int = 1000,
     use_wandb_tracking: bool = False,
     resume: bool = False,
