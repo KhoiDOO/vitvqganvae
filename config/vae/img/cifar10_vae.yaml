@@ -20,7 +20,7 @@ model_kwargs:
   out_channel: 3
   layers: 4
   layer_mults: [1, 1, 1, 1]
-  num_res_blocks: 0
+  num_res_blocks: 1
   group: 4
   conv_type: "conv2d"
   enc_act_func: "LeakyReLU"

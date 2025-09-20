@@ -1,6 +1,7 @@
 __all__ = [
     "VQVAEPipeline",
     "FlexVQVAEPipeline",
+    "VAEPipeline",
 
     "Encoder",
     "Decoder",
@@ -18,7 +19,7 @@ __all__ = [
     "ImgVITVQVAEConfig"
 ]
 
-from .hf import VQVAEPipeline, FlexVQVAEPipeline
+from .hf import VQVAEPipeline, FlexVQVAEPipeline, VAEPipeline
 
 from .cnn.encoder import Encoder
 from .cnn.decoder import Decoder
