@@ -1,4 +1,4 @@
-from ....utils.model.layer_map import cnn_mapping
+from ...layers.layer_map import cnn_mapping
 
 from torch import nn, Tensor
 
