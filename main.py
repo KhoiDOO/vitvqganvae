@@ -70,8 +70,8 @@ def main(args, extras):
         summary(
             copy.deepcopy(model_module),
             input_data=sample,
-            col_names=["input_size", "output_size", "num_params", "params_percent", "trainable"],
-            # depth=2
+            col_names=["input_size", "output_size", "num_params"],
+            depth=5
         )
     except Exception as e:
         print(f"Cannot run model summary: {e}")
