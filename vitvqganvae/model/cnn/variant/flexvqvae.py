@@ -3,7 +3,7 @@ from einops import rearrange
 
 from ..encoder import Encoder
 from ..decoder import Decoder
-from ....utils.model.layer_map import cnn_mapping, cnn_2_ndim, rearrange_map
+from ...layers.layer_map import cnn_mapping, cnn_2_ndim, rearrange_map
 from ...utils import rebuild_save_load
 from ....utils.helpers import count_parameters
 from pytorch_custom_utils import total_parameters
