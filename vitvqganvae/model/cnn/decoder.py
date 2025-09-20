@@ -1,5 +1,5 @@
 from .block import DecoderBlock
-from ...utils.model.layer_map import cnn_mapping, cnn_transpose_mapping
+from ..layers.layer_map import cnn_mapping, cnn_transpose_mapping
 from ...utils.helpers import default
 
 from torch import nn, Tensor
@@ -35,6 +35,9 @@ class Decoder(nn.Module):
         assert dim % group == 0, f'dimension {dim} must be divisible by {group} (groups for the groupnorm)'
 
         self.blocks = nn.ModuleList()
+
+        if layer_mults:
+            assert len(layer_mults) == layers, 'length of layer_mults must be equal to number of layers'
 
         self._layer_mults = default(layer_mults, list(map(lambda t: 2 ** t, range(layers))))
 
