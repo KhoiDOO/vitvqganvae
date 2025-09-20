@@ -12,3 +12,5 @@ python -m pytest test/model/cnn/test_flex_vqvae.py
 python -m pytest test/model/vit/test_img_encoder.py
 python -m pytest test/model/vit/test_img_decoder.py
 python -m pytest test/model/vit/test_img_vqvae.py
+
+python -m pytest test/model/layers/test_gaussian_layer.py
