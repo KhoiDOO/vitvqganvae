@@ -6,6 +6,8 @@ __all__ = [
     "Decoder",
     "VQVAE",
     "VQVAEConfig",
+    "VAE",
+    "VAEConfig",
 
     "FlexVQVAE",
     "FlexVQVAEConfig",
@@ -24,6 +26,7 @@ from .cnn.vqvae import VQVAE, VQVAEConfig
 from .cnn.variant import (
     FlexVQVAE, FlexVQVAEConfig
 )
+from .cnn.vae import VAE, VAEConfig
 
 from .vit.encoder import ImgVITEncoder
 from .vit.decoder import ImgVITDecoder
