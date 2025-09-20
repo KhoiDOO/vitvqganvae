@@ -1,7 +1,7 @@
 import unittest
 import torch
 from vitvqganvae.model.cnn.decoder import Decoder
-from vitvqganvae.utils.model.layer_map import cnn_mapping
+from vitvqganvae.model.layers.layer_map import cnn_mapping
 
 class TestDecoder(unittest.TestCase):
     def setUp(self):
