@@ -5,7 +5,7 @@ import torch
 from pathlib import Path
 from functools import partial
 from contextlib import nullcontext
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from torch.nn import Module
 
@@ -37,32 +37,32 @@ DEFAULT_DDP_KWARGS = DistributedDataParallelKwargs(
 
 @dataclass
 class VQVAETrainerConfig:
-    num_train_steps: int = 10000,
-    batch_size: int = 32,
-    num_workers: int = 4,
-    pin_memory: bool = True,
-    grad_accum_every: int = 1,
-    learning_rate: float = 2e-4,
-    weight_decay: float = 0.,
-    max_grad_norm: float | None = None,
-    val_every: int = 1,
-    val_num_batches: int = 5,
-    val_num_images: int = 32,
-    scheduler: str | None = None,
-    scheduler_kwargs: dict = dict(),
-    ema_kwargs: dict | None = None,
-    accelerator_kwargs: dict = dict(),
-    optimizer_name: str = "Adam",
-    optimizer_kwargs: dict = dict(),
-    loss_lambda: dict = dict(),
-    checkpoint_every: int | None = None,
-    save_results_every: int | None = None,
-    checkpoint_key: str | None = None,
-    warmup_steps: int = 1000,
-    use_wandb_tracking: bool = False,
-    resume: bool = False,
-    from_checkpoint: str | None = None,
-    from_checkpoint_type: str | None = None,
+    num_train_steps: int = 10000
+    batch_size: int = 32
+    num_workers: int = 4
+    pin_memory: bool = True
+    grad_accum_every: int = 1
+    learning_rate: float = 2e-4
+    weight_decay: float = 0.
+    max_grad_norm: float | None = None
+    val_every: int = 1
+    val_num_batches: int = 5
+    val_num_images: int = 32
+    scheduler: str | None = None
+    scheduler_kwargs: dict = field(default_factory=dict)
+    ema_kwargs: dict | None = None
+    accelerator_kwargs: dict = field(default_factory=dict)
+    optimizer_name: str = "Adam"
+    optimizer_kwargs: dict = field(default_factory=dict)
+    loss_lambda: dict = field(default_factory=dict)
+    checkpoint_every: int | None = None
+    save_results_every: int | None = None
+    checkpoint_key: str | None = None
+    warmup_steps: int = 1000
+    use_wandb_tracking: bool = False
+    resume: bool = False
+    from_checkpoint: str | None = None
+    from_checkpoint_type: str | None = None
 
 
 @beartype
@@ -99,7 +99,7 @@ class VQVAETrainer(Module):
         use_wandb_tracking: bool = False,
         resume: bool = False,
         from_checkpoint: str | None = None,
-        from_checkpoint_type: str | None = None,
+        from_checkpoint_type: str | None = None
     ):
         super().__init__()
 
