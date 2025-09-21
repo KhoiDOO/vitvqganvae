@@ -54,16 +54,13 @@ class Decoder(nn.Module):
             self.blocks.insert(
                 0,
                 nn.Sequential(
-                    cnn_transpose_mapping[conv_type](
+                    cnn_transpose_mapping[self._conv_type](
                         in_channels=dim_out,
                         out_channels=dim_in,
                         kernel_size=4,
                         stride=2,
                         padding=1
                     ),
-                    # getattr(nn, act_func)(
-                    #     **default(act_kwargs, {})
-                    # )
                     nn.LeakyReLU(0.1)
                 )
             )
@@ -73,14 +70,14 @@ class Decoder(nn.Module):
                     0,
                     DecoderBlock(
                         dim=dim_out,
-                        group=group,
-                        conv_type=conv_type,
-                        act_func=act_func,
-                        act_kwargs=act_kwargs
+                        group=self._group,
+                        conv_type=self._conv_type,
+                        act_func=self._act_func,
+                        act_kwargs=self._act_kwargs
                     )
                 )
 
-        self.blocks.append(cnn_mapping[conv_type](
+        self.blocks.append(cnn_mapping[self._conv_type](
             self._dim,
             self._out_channel,
             kernel_size=1
