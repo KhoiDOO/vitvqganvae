@@ -1,9 +1,9 @@
 from torch import nn
-from einops import rearrange
 
 from .encoder import Encoder
 from .decoder import Decoder
-from ..layers.layer_map import cnn_mapping, cnn_2_ndim, rearrange_map
+from .vqvae import dataconv_consistency_check
+from ..layers.layer_map import cnn_mapping, cnn_2_ndim
 from ..layers.gaussian import DiagonalGaussianDistribution
 from ..utils import rebuild_save_load
 from ...utils.helpers import count_parameters
@@ -45,7 +45,7 @@ class VAEConfig:
 class VAE(nn.Module):
     def __init__(
         self, 
-        dim: int,
+        dim: int,   
         in_channel: int = 3,
         out_channel: int = 3,
         layers: int = 4,
@@ -178,25 +178,12 @@ class VAE(nn.Module):
     ) -> dict[str, torch.Tensor] | torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         
         conv_type = getattr(self, '_conv_type', 'conv2d')
-        shape = img.shape
-        channels = shape[1]
-
-        if conv_type == 'conv1d':
-            length = shape[2]
-            assert (length % self._dim_divisor) == 0, f'length must be divisible by {self._dim_divisor}'
-            assert channels == self._in_channel, 'number of channels on audio is not equal to the channels set on this VQVAE'
-        elif conv_type == 'conv2d':
-            height, width = shape[2], shape[3]
-            for dim_name, size in (('height', height), ('width', width)):
-                assert (size % self._dim_divisor) == 0, f'{dim_name} must be divisible by {self._dim_divisor}'
-            assert channels == self._in_channel, 'number of channels on image or sketch is not equal to the channels set on this VQVAE'
-        elif conv_type == 'conv3d':
-            depth, height, width = shape[2], shape[3], shape[4]
-            for dim_name, size in (('depth', depth), ('height', height), ('width', width)):
-                assert (size % self._dim_divisor) == 0, f'{dim_name} must be divisible by {self._dim_divisor}'
-            assert channels == self._in_channel, 'number of channels on video is not equal to the channels set on this VQVAE'
-        else:
-            raise ValueError(f'Unknown conv_type: {conv_type}')
+        dataconv_consistency_check(
+            img, 
+            conv_type=conv_type,
+            dim_divisor=self._dim_divisor,
+            in_channel=self._in_channel
+        )
         
         posterior: DiagonalGaussianDistribution = self.encode(img)
         z = posterior.sample()
