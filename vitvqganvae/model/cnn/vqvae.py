@@ -20,6 +20,34 @@ import copy
 import os
 
 
+@beartype
+def dataconv_consistency_check(
+    img: torch.Tensor, 
+    conv_type: str,
+    dim_divisor: int,
+    in_channel: int
+) -> None:
+    shape = img.shape
+    channels = shape[1]
+
+    if conv_type == 'conv1d':
+        length = shape[2]
+        assert (length % dim_divisor) == 0, f'length must be divisible by {dim_divisor}'
+        assert channels == in_channel, 'number of channels on audio is not equal to the channels set on this VQVAE'
+    elif conv_type == 'conv2d':
+        height, width = shape[2], shape[3]
+        for dim_name, size in (('height', height), ('width', width)):
+            assert (size % dim_divisor) == 0, f'{dim_name} must be divisible by {dim_divisor}'
+        assert channels == in_channel, 'number of channels on image or sketch is not equal to the channels set on this VQVAE'
+    elif conv_type == 'conv3d':
+        depth, height, width = shape[2], shape[3], shape[4]
+        for dim_name, size in (('depth', depth), ('height', height), ('width', width)):
+            assert (size % dim_divisor) == 0, f'{dim_name} must be divisible by {dim_divisor}'
+        assert channels == in_channel, 'number of channels on video is not equal to the channels set on this VQVAE'
+    else:
+        raise ValueError(f'Unknown conv_type: {conv_type}')
+
+
 @dataclass
 class VQVAEConfig:
     dim: int = 64
@@ -213,27 +241,12 @@ class VQVAE(nn.Module):
     ) -> dict[str, torch.Tensor] | torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         
         conv_type = getattr(self, '_conv_type', 'conv2d')
-        device = img.device
-        shape = img.shape
-        batch = shape[0]
-        channels = shape[1]
-
-        if conv_type == 'conv1d':
-            length = shape[2]
-            assert (length % self._dim_divisor) == 0, f'length must be divisible by {self._dim_divisor}'
-            assert channels == self._in_channel, 'number of channels on audio is not equal to the channels set on this VQVAE'
-        elif conv_type == 'conv2d':
-            height, width = shape[2], shape[3]
-            for dim_name, size in (('height', height), ('width', width)):
-                assert (size % self._dim_divisor) == 0, f'{dim_name} must be divisible by {self._dim_divisor}'
-            assert channels == self._in_channel, 'number of channels on image or sketch is not equal to the channels set on this VQVAE'
-        elif conv_type == 'conv3d':
-            depth, height, width = shape[2], shape[3], shape[4]
-            for dim_name, size in (('depth', depth), ('height', height), ('width', width)):
-                assert (size % self._dim_divisor) == 0, f'{dim_name} must be divisible by {self._dim_divisor}'
-            assert channels == self._in_channel, 'number of channels on video is not equal to the channels set on this VQVAE'
-        else:
-            raise ValueError(f'Unknown conv_type: {conv_type}')
+        dataconv_consistency_check(
+            img, 
+            conv_type=conv_type,
+            dim_divisor=self._dim_divisor,
+            in_channel=self._in_channel
+        )
 
         fmap, indices, commit_loss = self.encode(img)
         fmap = self.decode(fmap)
