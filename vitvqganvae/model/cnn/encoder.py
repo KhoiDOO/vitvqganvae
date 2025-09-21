@@ -57,15 +57,15 @@ class Encoder(nn.Module):
         for layer_index, (dim_in, dim_out), layer_num_res_blocks in zip(range(layers), dim_pairs, num_res_blocks):
             self.blocks.append(
                 nn.Sequential(
-                    cnn_mapping[conv_type](
+                    cnn_mapping[self._conv_type](
                         in_channels=dim_in,
                         out_channels=dim_out,
                         kernel_size=4,
                         stride=2,
                         padding=1
                     ),
-                    getattr(nn, act_func)(
-                        **default(act_kwargs, {})
+                    getattr(nn, self._act_func)(
+                        **default(self._act_kwargs, {})
                     )
                 )
             )
@@ -74,14 +74,14 @@ class Encoder(nn.Module):
                 self.blocks.append(
                     EncoderBlock(
                         dim=dim_out,
-                        group=group,
-                        conv_type=conv_type,
-                        act_func=act_func,
-                        act_kwargs=act_kwargs
+                        group=self._group,
+                        conv_type=self._conv_type,
+                        act_func=self._act_func,
+                        act_kwargs=self._act_kwargs
                     )
                 )
 
-        self.blocks.insert(0, cnn_mapping[conv_type](
+        self.blocks.insert(0, cnn_mapping[self._conv_type](
             self._in_channel,
             self._dim,
             kernel_size=self._first_conv_kernel_size,
