@@ -21,7 +21,7 @@ spec:
           sizeLimit: 16Gi
       containers:
       - name: celeba
-        image: kohido/base_dl_cuda129:v0.0.6
+        image: kohido/base_dl_cuda129:v0.0.7
         env:
         - name: PYTHONUNBUFFERED
           value: "1"
@@ -45,7 +45,7 @@ spec:
               cd vitvqganvae
               git pull
             else
-              git clone https://${GITHUB_TOKEN}@github.com/KhoiDOO/vitvqganvae.git
+              git clone https://${GITHUB_TOKEN}@github.com/KhoiDOO/vitvqganvae.git@v0.4.8
               cd vitvqganvae/
             fi
             wandb login ${WANDB_API_KEY}
