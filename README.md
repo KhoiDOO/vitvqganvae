@@ -20,42 +20,6 @@ This project provides a comprehensive benchmark for evaluating the performance o
 
 ## 🚀 Setup
 
-
-<details>
-<summary>🛠️ Environment Information</summary>
-
-- Python: 3.10.0
-- CUDA: 12.9
-- torch==2.8.0
-- tqdm==4.67.1
-- beartype==0.21.0
-- omegaconf==2.3.0
-- pillow==11.0.0
-- opencv-python==4.12.0.88
-- scikit-image==0.25.2
-- albumentationsx==2.0.10
-- scikit-learn==1.7.1
-- wandb==0.21.1
-- tensorboard==2.20.0
-- datasets==4.0.0
-- einops==0.8.1
-- ema-pytorch==0.7.7
-- pytorch-warmup==0.2.0
-- pytorch-custom-utils==0.0.21
-- memory-efficient-attention-pytorch==0.1.6
-- sentencepiece==0.2.1
-- transformers==4.55.3
-- vector-quantize-pytorch==1.23.1
-- accelerate==1.10.0
-- torchinfo==1.8.0
-- gdown==5.2.0
-- onnx==1.19.0
-- onnxruntime==1.22.1
-- diffusers==0.35.1
-- ninja==1.13.0
-
-</details>
-
 ### 🐍 Python
 ```bash
 python3 -m venv .env
