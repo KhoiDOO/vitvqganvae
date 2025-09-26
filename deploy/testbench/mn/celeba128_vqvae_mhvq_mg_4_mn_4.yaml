@@ -1,0 +1,164 @@
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  name: dokh-bench-celebavqvae-mhvq-mg-4-mn-4
+spec:
+  runPolicy:
+    cleanPodPolicy: None            # keep pods until TTL fires
+    ttlSecondsAfterFinished: 60     # delete job + child pods ~60s after completion
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+            scheduling.volcano.sh/queue-name: "default"   # change if your queue differs
+        spec:
+          schedulerName: volcano
+          containers:
+            - name: pytorch
+              image: kohido/base_dl_cuda129:v0.0.7
+              imagePullPolicy: IfNotPresent
+              resources:
+                limits:   { nvidia.com/gpu: 4 }
+                requests: { nvidia.com/gpu: 4 }
+              env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: dokh-secret
+                    key: GITHUB_TOKEN
+              - name: WANDB_API_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: dokh-secret
+                    key: WANDB_API_KEY
+              volumeMounts:
+              - {name: project, mountPath: /mnt/project}
+              - {name: data, mountPath: /mnt/data}
+              - {name: dshm, mountPath: /dev/shm}
+              command: ["/bin/bash","-lc"]
+              # enforce umask 0002 (group‑writable) before your process starts
+              args:
+              - |
+                cd /mnt/project
+                if [ -d "vitvqganvae" ]; then
+                  cd vitvqganvae
+                  git config --global --add safe.directory /mnt/project/vitvqganvae
+                  git pull
+                else
+                  git clone https://${GITHUB_TOKEN}@github.com/KhoiDOO/vitvqganvae.git@v0.4.8
+                  cd vitvqganvae/
+                fi
+                wandb login ${WANDB_API_KEY}
+                accelerate launch \
+                  --mixed_precision=no \
+                  --num_processes=16 \
+                  --num_machines=4 \
+                  --machine_rank 0 \
+                  --main_process_ip $MASTER_ADDR \
+                  --main_process_port $MASTER_PORT \
+                  --dynamo_backend=no \
+                  main.py \
+                  --config config/img/celeba128/celeba128_vqvae_mhvq.yaml \
+                  --train \
+                  trainer_kwargs.use_wandb_tracking=True \
+                  dataset_kwargs.root=/mnt/data/celeba
+          volumes:
+          - name: project
+            persistentVolumeClaim:
+              claimName: prj-2
+          - name: data
+            persistentVolumeClaim:
+              claimName: celeba-2
+          - name: dshm
+            emptyDir:
+              medium: Memory
+              sizeLimit: 32Gi
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 100
+            fsGroup: 100
+            fsGroupChangePolicy: OnRootMismatch
+    
+    Worker:
+      replicas: 3
+      restartPolicy: Never
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+            scheduling.volcano.sh/queue-name: "default"
+        spec:
+          schedulerName: volcano
+          containers:
+            - name: pytorch
+              image: kohido/base_dl_cuda129:v0.0.7
+              imagePullPolicy: IfNotPresent
+              resources:
+                limits:   { nvidia.com/gpu: 4 }
+                requests: { nvidia.com/gpu: 4 }
+              env:
+              - name: GITHUB_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: dokh-secret
+                    key: GITHUB_TOKEN
+              - name: WANDB_API_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: dokh-secret
+                    key: WANDB_API_KEY
+              - name: RANK_INDEX
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.annotations['kubeflow.org/replica-index']
+              volumeMounts:
+              - {name: project, mountPath: /mnt/project}
+              - {name: data, mountPath: /mnt/data}
+              - {name: dshm, mountPath: /dev/shm}
+              command: ["/bin/bash","-lc"]
+              # enforce umask 0002 (group‑writable) before your process starts
+              args:
+              - |
+                cd /mnt/project
+                if [ -d "vitvqganvae" ]; then
+                  cd vitvqganvae
+                  git config --global --add safe.directory /mnt/project/vitvqganvae
+                  git pull
+                else
+                  git clone https://${GITHUB_TOKEN}@github.com/KhoiDOO/vitvqganvae.git@v0.4.8
+                  cd vitvqganvae/
+                fi
+                wandb login ${WANDB_API_KEY}
+                accelerate launch \
+                  --mixed_precision=no \
+                  --num_processes=16 \
+                  --num_machines=4 \
+                  --machine_rank ${RANK_INDEX+1} \
+                  --dynamo_backend=no \
+                  --main_process_ip $MASTER_ADDR \
+                  --main_process_port $MASTER_PORT \
+                  main.py \
+                  --config config/img/celeba128/celeba128_vqvae_mhvq.yaml \
+                  --train \
+                  trainer_kwargs.use_wandb_tracking=True \
+                  dataset_kwargs.root=/mnt/data/celeba
+          volumes:
+          - name: project
+            persistentVolumeClaim:
+              claimName: prj-2
+          - name: data
+            persistentVolumeClaim:
+              claimName: celeba-2
+          - name: dshm
+            emptyDir:
+              medium: Memory
+              sizeLimit: 32Gi
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 100
+            fsGroup: 100
+            fsGroupChangePolicy: OnRootMismatch
